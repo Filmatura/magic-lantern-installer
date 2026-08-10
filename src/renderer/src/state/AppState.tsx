@@ -18,7 +18,7 @@ interface AppStateShape {
 const initialValues: FlowStateValues = {
   firmwareReady: null,
   selectedDrive: null,
-  selectedBuildId: 'amit',
+  selectedBuildId: 'filmatura',
   offlineMode: false,
   mlVersion: null,
   mlBuildName: null

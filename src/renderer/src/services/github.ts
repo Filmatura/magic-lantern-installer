@@ -4,16 +4,14 @@ export interface LatestBuildInfo {
   zipName: string
 }
 
-const REPO = 'Amit199167/Crop-mood-eosm-slim-gui'
-
 /**
- * This repo doesn't attach formal release assets - the actual .zip lives as
- * a markdown link to a github user-attachments file inside the release
- * body. We check the assets array first (in case that ever changes) and
- * fall back to parsing the body.
+ * Some of these repos (e.g. Amit's) don't attach formal release assets -
+ * the actual .zip lives as a markdown link to a github user-attachments
+ * file inside the release body. We check the assets array first (in case
+ * that's ever used) and fall back to parsing the body.
  */
-export async function fetchLatestBuild(): Promise<LatestBuildInfo> {
-  const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
+export async function fetchLatestBuild(repo: string): Promise<LatestBuildInfo> {
+  const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
     headers: { Accept: 'application/vnd.github+json' }
   })
   if (!res.ok) throw new Error(`GitHub API responded ${res.status}`)
