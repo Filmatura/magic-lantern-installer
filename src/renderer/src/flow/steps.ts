@@ -1,4 +1,5 @@
 import { BUILD_OPTIONS } from '@shared/builds'
+import firmwareUpdateVideo from '@renderer/assets/videos/firmware-update.mp4'
 import type { FlowStateValues, QuestionStep, StepDef } from './types'
 
 /**
@@ -113,6 +114,7 @@ export const steps: StepDef[] = [
     type: 'info',
     eyebrow: 'On your camera',
     title: 'Run the Canon firmware update',
+    media: { kind: 'video', src: firmwareUpdateVideo },
     body: [
       'Put the card back into your EOS M.',
       'Turn on the camera, and rotate the mode dial (around the shutter button) to Photo mode.',
