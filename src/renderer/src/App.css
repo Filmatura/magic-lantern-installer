@@ -1,0 +1,14 @@
+.step-engine {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-engine--bare {
+  display: block;
+}
+
+.step-engine__body {
+  flex: 1;
+  min-height: 0;
+}

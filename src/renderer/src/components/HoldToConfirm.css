@@ -1,0 +1,46 @@
+.hold-confirm {
+  position: relative;
+  appearance: none;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-pill);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  min-width: 260px;
+  touch-action: none;
+  transition: color 0.15s ease;
+}
+
+.hold-confirm__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-danger);
+  transform-origin: left center;
+  transform: scaleX(0);
+  z-index: -1;
+  border-radius: inherit;
+}
+
+.hold-confirm--active {
+  color: #fff;
+}
+
+.hold-confirm--active .hold-confirm__fill {
+  transition: none;
+}
+
+.hold-confirm__label {
+  position: relative;
+  pointer-events: none;
+}
+
+.hold-confirm:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

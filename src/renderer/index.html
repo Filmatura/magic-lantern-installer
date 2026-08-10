@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      Tidio (troubleshooting-page chat widget) needs a real CSP relaxation,
+      not just its script host: it renders in an iframe, opens a websocket,
+      and pulls its own styles/fonts/images. Scoped to *.tidio.co - if the
+      widget doesn't render, check the forwarded [renderer] console log in
+      the main process output for the exact host CSP is blocking.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: https://*.tidio.co; media-src 'self'; style-src 'self' 'unsafe-inline' https://*.tidio.co; font-src 'self' data: https://*.tidio.co; script-src 'self' https://*.tidio.co; frame-src https://*.tidio.co; connect-src 'self' https://api.github.com https://github.com https://objects.githubusercontent.com https://raw.githubusercontent.com https://drive.google.com https://docs.google.com https://*.tidio.co wss://*.tidio.co;"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Magic Lantern Installer - Filmatura</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>
