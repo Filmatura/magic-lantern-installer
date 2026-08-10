@@ -15,11 +15,6 @@
   border-radius: 0;
 }
 
-.media-slot--video .media-slot__el {
-  object-fit: contain;
-  max-height: none;
-}
-
 .media-slot__el {
   width: 100%;
   max-height: 320px;

@@ -1,4 +1,5 @@
 import type { MediaSpec } from '@renderer/flow/types'
+import { VideoPlayer } from './VideoPlayer'
 import './MediaSlot.css'
 
 export function MediaSlot({ media }: { media?: MediaSpec }): React.JSX.Element | null {
@@ -7,7 +8,7 @@ export function MediaSlot({ media }: { media?: MediaSpec }): React.JSX.Element |
   if (media.kind === 'video') {
     return (
       <div className="media-slot media-slot--video">
-        <video className="media-slot__el" src={media.src} poster={media.poster} controls autoPlay />
+        <VideoPlayer src={media.src} poster={media.poster} autoPlay />
       </div>
     )
   }
