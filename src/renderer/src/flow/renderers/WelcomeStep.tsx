@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import filmaturaBlack from '@renderer/assets/brand/filmatura-black.png'
 import { Button } from '@renderer/components/Button'
 import { APP_VERSION } from '@renderer/version'
@@ -21,44 +21,102 @@ const WELCOME_VIDEO_PLAYLIST = [
   'https://cdn.shopify.com/videos/c/vp/66af8c92933345959908bb5971214925/66af8c92933345959908bb5971214925.HD-720p-4.5Mbps-48835030.mp4'
 ]
 
+const MAX_LOAD_ATTEMPTS = WELCOME_VIDEO_PLAYLIST.length * 2
+
 export function WelcomeStep({ step, onNext }: { step: WelcomeStepDef; onNext: () => void }): React.JSX.Element {
   const [update, setUpdate] = useState<UpdateStatus | null>(null)
-  const [videoIndex, setVideoIndex] = useState(0)
-  const [errorStreak, setErrorStreak] = useState(0)
+  // Two persistent <video> elements, only one visible at a time. Setting
+  // `.src` on a single video element forces it through a blank/no-data
+  // state before the next frame decodes - that gap is what was showing as
+  // a white flash (the page behind it peeking through). Instead, the
+  // hidden slot preloads (and is started playing, muted, off-screen-
+  // equivalent via opacity) the next clip well ahead of time, so swapping
+  // which slot is on top is instant with a real frame already on screen.
+  const slotRefs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)]
+  const slotIndices = useRef<[number, number]>([0, WELCOME_VIDEO_PLAYLIST.length > 1 ? 1 : 0])
+  const [front, setFront] = useState<0 | 1>(0)
+  const [dead, setDead] = useState(false)
+  const failCount = useRef(0)
 
   useEffect(() => {
     return window.api?.update.onStatus(setUpdate)
   }, [])
 
-  const advanceVideo = (): void => {
-    setErrorStreak(0)
-    setVideoIndex((i) => (i + 1) % WELCOME_VIDEO_PLAYLIST.length)
+  useEffect(() => {
+    const [a, b] = slotIndices.current
+    const va = slotRefs[0].current
+    const vb = slotRefs[1].current
+    if (va) {
+      va.src = WELCOME_VIDEO_PLAYLIST[a]
+      va.play().catch(() => {})
+    }
+    if (vb) {
+      vb.src = WELCOME_VIDEO_PLAYLIST[b]
+      vb.play().catch(() => {})
+    }
+    // Mount-only: sets up both slots once. Transitions after this are
+    // driven imperatively by handleEnded/handleError below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Every loaded slot plays continuously, muted, regardless of whether it's
+  // the visible (front) one - only opacity decides what's on screen. That
+  // way the hidden slot has been decoding real frames the whole time the
+  // front one plays, so becoming visible is an instant swap instead of
+  // waiting on `.play()` to spin up from a paused/buffered-only state
+  // (which is what caused a brief black flash at each transition).
+  const loadSlot = (slot: 0 | 1, playlistIndex: number): void => {
+    const el = slotRefs[slot].current
+    if (!el) return
+    slotIndices.current[slot] = playlistIndex
+    el.src = WELCOME_VIDEO_PLAYLIST[playlistIndex]
+    el.play().catch(() => {})
   }
 
-  // If every clip in the playlist fails in a row (offline launch, most
-  // likely), stop retrying instead of spinning through failed network
-  // requests forever - the card still shows fine with no background video.
-  const handleVideoError = (): void => {
-    const nextStreak = errorStreak + 1
-    setErrorStreak(nextStreak)
-    if (nextStreak < WELCOME_VIDEO_PLAYLIST.length) {
-      setVideoIndex((i) => (i + 1) % WELCOME_VIDEO_PLAYLIST.length)
+  const handleEnded = (finishedSlot: 0 | 1): void => {
+    if (finishedSlot !== front || dead) return
+    failCount.current = 0
+    const back = finishedSlot === 0 ? 1 : 0
+    setFront(back)
+    const nextIndex = (slotIndices.current[back] + 1) % WELCOME_VIDEO_PLAYLIST.length
+    loadSlot(finishedSlot, nextIndex)
+  }
+
+  // A single dead clip shouldn't take the whole background down - skip it
+  // and try the next one in that slot. Only if failures pile up (e.g. a
+  // fully offline launch) does this give up entirely, so it doesn't spin
+  // retrying network requests forever.
+  const handleError = (slot: 0 | 1): void => {
+    failCount.current += 1
+    if (failCount.current > MAX_LOAD_ATTEMPTS) {
+      setDead(true)
+      return
     }
+    const nextIndex = (slotIndices.current[slot] + 1) % WELCOME_VIDEO_PLAYLIST.length
+    loadSlot(slot, nextIndex)
   }
 
   return (
     <div className="welcome-step">
-      {errorStreak < WELCOME_VIDEO_PLAYLIST.length && (
-        <video
-          key={videoIndex}
-          className="welcome-step__bg-video"
-          src={WELCOME_VIDEO_PLAYLIST[videoIndex]}
-          autoPlay
-          muted
-          playsInline
-          onEnded={advanceVideo}
-          onError={handleVideoError}
-        />
+      {!dead && (
+        <>
+          <video
+            ref={slotRefs[0]}
+            className={`welcome-step__bg-video ${front === 0 ? 'welcome-step__bg-video--front' : ''}`}
+            muted
+            playsInline
+            onEnded={() => handleEnded(0)}
+            onError={() => handleError(0)}
+          />
+          <video
+            ref={slotRefs[1]}
+            className={`welcome-step__bg-video ${front === 1 ? 'welcome-step__bg-video--front' : ''}`}
+            muted
+            playsInline
+            onEnded={() => handleEnded(1)}
+            onError={() => handleError(1)}
+          />
+        </>
       )}
       <div className="welcome-step__card">
         <div className="welcome-step__content">

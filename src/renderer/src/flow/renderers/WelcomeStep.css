@@ -8,6 +8,7 @@
   padding: var(--space-8);
   position: relative;
   overflow: hidden;
+  background: #000;
 }
 
 .welcome-step__bg-video {
@@ -17,6 +18,13 @@
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  opacity: 0;
+  background: #000;
+}
+
+.welcome-step__bg-video--front {
+  z-index: 1;
+  opacity: 1;
 }
 
 .welcome-step__card {
