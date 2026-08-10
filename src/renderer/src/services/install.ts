@@ -13,15 +13,15 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
 /**
  * Fetched proactively, before the user even confirms the install, so they
  * can see what version they're about to get. Returns null on any failure
- * (no internet, no release found, or offline mode) - callers treat that
- * as "nothing available" since there's no offline bundled copy for Amit's
- * build specifically (the other two builds are bundled and need no fetch
- * at all - see runSubStep).
+ * (no internet, no release found, offline mode, or no repo to check) -
+ * callers treat that as "nothing available" since there's no offline
+ * bundled copy for the remote builds specifically (the other two builds
+ * are bundled and need no fetch at all - see runSubStep).
  */
-export async function previewLatestBuild(offlineMode: boolean): Promise<LatestBuildInfo | null> {
-  if (offlineMode) return null
+export async function previewLatestBuild(offlineMode: boolean, repo: string | undefined): Promise<LatestBuildInfo | null> {
+  if (offlineMode || !repo) return null
   try {
-    return await fetchLatestBuild()
+    return await fetchLatestBuild(repo)
   } catch {
     return null
   }

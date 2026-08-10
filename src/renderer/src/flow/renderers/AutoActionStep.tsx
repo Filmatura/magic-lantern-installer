@@ -36,18 +36,27 @@ export function AutoActionStep({
   const drive = values.selectedDrive
 
   useEffect(() => {
-    if (!needsRemotePreview) return
+    if (!needsRemotePreview) {
+      setPreview(null)
+      return
+    }
+    setPreview('loading')
     let cancelled = false
-    previewLatestBuild(values.offlineMode).then((result) => {
+    previewLatestBuild(values.offlineMode, selectedBuild?.githubRepo).then((result) => {
       if (!cancelled) setPreview(result)
     })
     return () => {
       cancelled = true
     }
-    // Only re-check if this changes - re-running on every offlineMode
-    // flicker would refetch mid-render for no reason.
+    // Re-check whenever the selected build's repo changes - not just when
+    // toggling between "some remote build" and "a bundled one." Keying off
+    // `needsRemotePreview` alone missed switching between two different
+    // remote builds (e.g. Filmatura's fork -> Amit's), since that boolean
+    // stays true across the switch while the repo to fetch actually
+    // changes. Re-running on every offlineMode flicker would refetch
+    // mid-render for no reason, so that's deliberately left out.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needsRemotePreview])
+  }, [needsRemotePreview, selectedBuild?.githubRepo])
 
   const run = async (): Promise<void> => {
     setPhase('running')
@@ -134,7 +143,7 @@ export function AutoActionStep({
                   : preview === 'loading'
                     ? 'Checking for the latest build...'
                     : preview
-                      ? `Crop Mood Slim Build - Amit - ${preview.version}`
+                      ? `${selectedBuild?.label} - ${preview.version}`
                       : 'Unavailable - no internet reached'}
               </strong>
             </div>

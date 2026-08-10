@@ -63,7 +63,7 @@ export const steps: StepDef[] = [
     eyebrow: 'Advanced',
     title: 'Choose your build',
     subtitle:
-      "This is an advanced option most people should skip. Amit's Crop Mood Slim is the actively maintained build and strongly recommended - only pick one of the others if you specifically need what it offers.",
+      "This is an advanced option most people should skip. Filmatura's Crop Mood is the recommended default - only pick one of the others if you specifically need what it offers.",
     options: BUILD_OPTIONS,
     next: 'install-magic-lantern'
   },

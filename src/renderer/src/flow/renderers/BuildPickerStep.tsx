@@ -40,7 +40,7 @@ export function BuildPickerStep({
             <div className="build-picker__card-top">
               <span className="build-picker__label">{option.label}</span>
               <span className={`build-picker__tag ${option.recommended ? 'build-picker__tag--recommended' : 'build-picker__tag--caution'}`}>
-                {option.recommended ? 'Recommended' : 'Not actively maintained'}
+                {option.recommended ? 'Recommended' : (option.tagLabel ?? 'Not actively maintained')}
               </span>
             </div>
             <p className="build-picker__description">{option.description}</p>
