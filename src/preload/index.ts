@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module'
 import type { DiskDevice, FormatResult } from '@shared/diskTypes'
+import type { UpdateStatus } from '@shared/updateTypes'
 
 const require = createRequire(import.meta.url)
 const { contextBridge, ipcRenderer } = require('electron') as typeof import('electron')
@@ -49,6 +50,16 @@ const api = {
     const handler = (_event: unknown, line: string): void => cb(line)
     ipcRenderer.on('task:log', handler)
     return () => ipcRenderer.removeListener('task:log', handler)
+  },
+
+  update: {
+    /** Streams the auto-update lifecycle (checking/available/downloading/downloaded/error). Returns an unsubscribe function. */
+    onStatus: (cb: (status: UpdateStatus) => void): (() => void) => {
+      const handler = (_event: unknown, status: UpdateStatus): void => cb(status)
+      ipcRenderer.on('update:status', handler)
+      return () => ipcRenderer.removeListener('update:status', handler)
+    },
+    quitAndInstall: (): Promise<void> => ipcRenderer.invoke('update:quitAndInstall')
   }
 }
 

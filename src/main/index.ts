@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { registerDiskIpc } from './ipc/disk'
 import { registerMlIpc } from './ipc/ml'
 import { registerFirmwareIpc } from './ipc/firmware'
+import { registerUpdateIpc } from './ipc/update'
 
 // Electron's built-in "electron" module doesn't reliably expose named ESM
 // exports on every Node/Electron combo (its shape isn't statically
@@ -11,7 +12,7 @@ import { registerFirmwareIpc } from './ipc/firmware'
 const require = createRequire(import.meta.url)
 const { app, shell, BrowserWindow, ipcMain } = require('electron') as typeof import('electron')
 
-function createWindow(): void {
+function createWindow(): InstanceType<typeof BrowserWindow> {
   const win = new BrowserWindow({
     width: 1040,
     height: 720,
@@ -46,6 +47,8 @@ function createWindow(): void {
   } else {
     win.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return win
 }
 
 ipcMain.handle('app:getPlatform', () => process.platform)
@@ -61,7 +64,8 @@ registerMlIpc(ipcMain)
 registerFirmwareIpc(ipcMain)
 
 app.whenReady().then(() => {
-  createWindow()
+  const win = createWindow()
+  registerUpdateIpc(ipcMain, win)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

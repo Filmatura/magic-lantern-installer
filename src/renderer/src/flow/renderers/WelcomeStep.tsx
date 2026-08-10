@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import filmaturaBlack from '@renderer/assets/brand/filmatura-black.png'
 import { Button } from '@renderer/components/Button'
-import { checkForUpdate, type UpdateManifest } from '@renderer/services/updateCheck'
 import { APP_VERSION } from '@renderer/version'
 import type { WelcomeStep as WelcomeStepDef } from '@renderer/flow/types'
+import type { UpdateStatus } from '@shared/updateTypes'
 import './WelcomeStep.css'
 
 export function WelcomeStep({ step, onNext }: { step: WelcomeStepDef; onNext: () => void }): React.JSX.Element {
-  const [update, setUpdate] = useState<UpdateManifest | null>(null)
+  const [update, setUpdate] = useState<UpdateStatus | null>(null)
 
   useEffect(() => {
-    checkForUpdate(APP_VERSION).then(setUpdate)
+    return window.api?.update.onStatus(setUpdate)
   }, [])
 
   return (
@@ -23,13 +23,14 @@ export function WelcomeStep({ step, onNext }: { step: WelcomeStepDef; onNext: ()
         <Button size="lg" withArrow onClick={onNext} className="welcome-step__cta">
           Get started
         </Button>
-        {update && (
-          <button
-            type="button"
-            className="welcome-step__update"
-            onClick={() => window.api?.openExternal(update.url)}
-          >
-            Update available - v{update.version} →
+        {update?.state === 'downloading' && (
+          <span className="welcome-step__update welcome-step__update--passive">
+            Downloading update... {update.percent}%
+          </span>
+        )}
+        {update?.state === 'downloaded' && (
+          <button type="button" className="welcome-step__update" onClick={() => window.api?.update.quitAndInstall()}>
+            Restart to update - v{update.version} →
           </button>
         )}
       </div>

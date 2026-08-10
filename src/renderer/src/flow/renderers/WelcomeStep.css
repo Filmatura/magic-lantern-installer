@@ -69,3 +69,12 @@
 .welcome-step__update:hover {
   border-color: var(--color-text);
 }
+
+.welcome-step__update--passive {
+  cursor: default;
+  color: var(--color-text-tertiary);
+}
+
+.welcome-step__update--passive:hover {
+  border-color: var(--color-border-strong);
+}
