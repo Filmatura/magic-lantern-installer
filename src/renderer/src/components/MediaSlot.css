@@ -7,6 +7,19 @@
   margin: var(--space-5) 0;
 }
 
+/* This footage has a white background baked in, so it should sit flush
+   with the page instead of reading as an inserted card. */
+.media-slot--video {
+  border: none;
+  background: none;
+  border-radius: 0;
+}
+
+.media-slot--video .media-slot__el {
+  object-fit: contain;
+  max-height: none;
+}
+
 .media-slot__el {
   width: 100%;
   max-height: 320px;
