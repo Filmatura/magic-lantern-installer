@@ -1,5 +1,6 @@
 import { BUILD_OPTIONS } from '@shared/builds'
 import firmwareUpdateVideo from '@renderer/assets/videos/firmware-update.mp4'
+import shutterReleaseVideo from '@renderer/assets/videos/shutter-release-without-lens.mp4'
 import type { FlowStateValues, QuestionStep, StepDef } from './types'
 
 /**
@@ -41,6 +42,20 @@ export const steps: StepDef[] = [
       ]
     },
     cta: "I'm ready",
+    next: 'enable-shutter-release'
+  },
+  {
+    id: 'enable-shutter-release',
+    type: 'info',
+    eyebrow: 'On your camera',
+    title: 'Enable release shutter without lens',
+    media: { kind: 'video', src: shutterReleaseVideo },
+    body: [
+      'Turn on the camera.',
+      'Press MENU, go to Settings (first page from the right), scroll down to Custom Functions (C.Fn), and press OK.',
+      'Press left once to get to page 7.',
+      'Press OK to open the selection, choose Enable, then press OK again.'
+    ],
     next: 'drive-picker'
   },
   {
@@ -116,10 +131,9 @@ export const steps: StepDef[] = [
     title: 'Run the Canon firmware update',
     media: { kind: 'video', src: firmwareUpdateVideo },
     body: [
-      'Put the card back into your EOS M.',
-      'Turn on the camera, and rotate the mode dial (around the shutter button) to Photo mode.',
-      'Go to Settings, second page from the right, scroll down to "Firmware Ver.:", press OK, then press OK again to start the update.',
-      'Wait for the green confirmation screen, then restart the camera.'
+      'Put the card we just flashed into your EOS M.',
+      'Press MENU to go to Settings, second page from the right, scroll down to "Firmware Ver.:", press OK, then press OK again to start the update.',
+      'Wait for the confirmation screen, then press OK and restart the camera.'
     ],
     cta: "I've updated the firmware",
     next: 'firmware-confirm'
