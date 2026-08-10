@@ -1,0 +1,32 @@
+.log-panel {
+  background: #0a0a0a;
+  color: #d8d8d8;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  max-height: 160px;
+}
+
+.log-panel__empty {
+  color: #6b6b6b;
+}
+
+.log-panel__line {
+  display: flex;
+  gap: var(--space-3);
+  white-space: pre-wrap;
+}
+
+.log-panel__line--success {
+  color: #6fd99a;
+}
+.log-panel__line--error {
+  color: #ef8b83;
+}
+
+.log-panel__time {
+  color: #6b6b6b;
+  flex-shrink: 0;
+}

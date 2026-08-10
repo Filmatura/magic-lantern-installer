@@ -1,0 +1,28 @@
+.back-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 14px 10px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.back-btn:hover {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-sunken);
+}
+
+.back-btn__arrow {
+  font-size: 17px;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}

@@ -1,0 +1,45 @@
+.progress-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: var(--space-5) var(--space-7) var(--space-3);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.progress-header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.progress-header__logo {
+  height: 24px;
+  width: auto;
+  opacity: 0.92;
+}
+
+.progress-header__count {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-header__track {
+  margin-top: var(--space-3);
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.progress-header__fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: inherit;
+  transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}

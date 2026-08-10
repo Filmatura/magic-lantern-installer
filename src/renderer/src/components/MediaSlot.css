@@ -1,0 +1,15 @@
+.media-slot {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  margin: var(--space-5) 0;
+}
+
+.media-slot__el {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  display: block;
+}

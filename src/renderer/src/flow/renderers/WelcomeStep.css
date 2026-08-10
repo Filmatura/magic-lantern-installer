@@ -1,0 +1,71 @@
+.welcome-step {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8);
+  position: relative;
+}
+
+.welcome-step__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 460px;
+}
+
+.welcome-step__brand {
+  height: 34px;
+  width: auto;
+  flex-shrink: 0;
+  margin-bottom: var(--space-3);
+}
+
+.welcome-step__version {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-6);
+}
+
+.welcome-step__title {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1.08;
+}
+
+.welcome-step__subtitle {
+  margin: var(--space-4) 0 var(--space-7);
+  font-size: 17px;
+  color: var(--color-text-secondary);
+}
+
+.welcome-step__footnote {
+  position: absolute;
+  bottom: var(--space-6);
+  font-size: 12.5px;
+  color: var(--color-text-tertiary);
+}
+
+.welcome-step__update {
+  appearance: none;
+  cursor: pointer;
+  margin-top: var(--space-5);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: border-color 0.15s ease;
+}
+
+.welcome-step__update:hover {
+  border-color: var(--color-text);
+}

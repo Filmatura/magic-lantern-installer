@@ -1,0 +1,40 @@
+.step-transition {
+  height: 100%;
+}
+
+.step-transition--forward {
+  animation: step-in-forward 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.step-transition--back {
+  animation: step-in-back 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes step-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes step-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-transition--forward,
+  .step-transition--back {
+    animation: none;
+  }
+}
