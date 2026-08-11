@@ -208,6 +208,8 @@ export const steps: StepDef[] = [
     media: { kind: 'video', src: magicLanternInfoVideo },
     body: [
       'Rotate the mode dial (around the shutter button) to Video mode.',
+      'Turn on the camera.',
+      'Press the INFO button once to switch to the Magic Lantern overlay.',
       'Hold the Down (Trashcan) button to access Magic Lantern menus.',
       'Press OK to hide the disclaimer.',
       "You're now ready to go!"
