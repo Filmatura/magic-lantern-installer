@@ -52,6 +52,8 @@ export function HoldToConfirm({
     rafRef.current = requestAnimationFrame(tick)
   }, [disabled, tick])
 
+  const text = holding ? holdingLabel : label
+
   return (
     <button
       type="button"
@@ -62,8 +64,19 @@ export function HoldToConfirm({
       onPointerLeave={stop}
       onPointerCancel={stop}
     >
-      <span className="hold-confirm__fill" style={{ transform: `scaleX(${progress})` }} />
-      <span className="hold-confirm__label">{holding ? holdingLabel : label}</span>
+      {/* Base layer: red label on the pale background, for whatever the red
+          fill hasn't reached yet. */}
+      <span className="hold-confirm__label hold-confirm__label--base">{text}</span>
+      {/* Overlay: red background + white label, both full-width and laid
+          out identically to the base layer, then clipped to the fill's
+          current progress. This is what makes the white text line up
+          pixel-for-pixel with the red text as the clip reveals more of it -
+          the earlier version just swapped the whole label to white on
+          press, which was invisible against the still-pale, not-yet-filled
+          background. */}
+      <span className="hold-confirm__fill" style={{ clipPath: `inset(0 ${100 - progress * 100}% 0 0)` }}>
+        <span className="hold-confirm__label">{text}</span>
+      </span>
     </button>
   )
 }

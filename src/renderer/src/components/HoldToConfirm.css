@@ -14,30 +14,42 @@
   isolation: isolate;
   min-width: 260px;
   touch-action: none;
-  transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Full-size red overlay holding a white copy of the label, clipped to the
+   current hold progress. Because both this and the base label are
+   independently centered within the same box, the white text lines up
+   pixel-for-pixel with the red text underneath as the clip reveals more of
+   it - the visual read is "the red sweep inverts the text as it passes",
+   rather than the whole label flipping color the instant you press down
+   (which left white text sitting on the still-pale, not-yet-filled
+   background - unreadable). */
 .hold-confirm__fill {
   position: absolute;
   inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--color-danger);
-  transform-origin: left center;
-  transform: scaleX(0);
-  z-index: -1;
-  border-radius: inherit;
-}
-
-.hold-confirm--active {
   color: #fff;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: clip-path 0.2s ease;
 }
 
 .hold-confirm--active .hold-confirm__fill {
+  /* Driven frame-by-frame from JS while actively holding - a CSS
+     transition here would lag a step behind the real progress. */
   transition: none;
 }
 
 .hold-confirm__label {
   position: relative;
   pointer-events: none;
+  white-space: nowrap;
 }
 
 .hold-confirm:disabled {
