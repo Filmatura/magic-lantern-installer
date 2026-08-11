@@ -112,6 +112,48 @@
   border-color: var(--color-border-strong);
 }
 
+.welcome-step__update-banner {
+  width: 100%;
+  margin: var(--space-5) 0 var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  text-align: left;
+}
+
+.welcome-step__update-banner-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.welcome-step__update-banner-text {
+  margin: 4px 0 var(--space-3);
+  font-size: 13.5px;
+  color: var(--color-accent-contrast);
+}
+
+.welcome-step__update-banner-btn {
+  appearance: none;
+  cursor: pointer;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-contrast);
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 700;
+  transition: opacity 0.15s ease;
+}
+
+.welcome-step__update-banner-btn:hover {
+  opacity: 0.85;
+}
+
 .welcome-step__quick-mode {
   appearance: none;
   cursor: pointer;

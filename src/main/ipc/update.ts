@@ -24,12 +24,33 @@ export function registerUpdateIpc(ipcMain: IpcMain, win: BrowserWindow): void {
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = false
 
+  // electron-updater fires the same generic 'error' event whether the
+  // initial check failed (no internet, no release published yet, a 404 -
+  // we don't actually know if a newer version exists) or a download/apply
+  // step failed *after* a real update was already confirmed. Tracking the
+  // last confirmed version here is what lets those two cases show
+  // different UI - a confusing "update available" prompt when there might
+  // not even be one is worse than staying silent.
+  let knownUpdateVersion: string | null = null
+
   autoUpdater.on('checking-for-update', () => send({ state: 'checking' }))
-  autoUpdater.on('update-available', (info) => send({ state: 'available', version: info.version }))
-  autoUpdater.on('update-not-available', () => send({ state: 'not-available' }))
+  autoUpdater.on('update-available', (info) => {
+    knownUpdateVersion = info.version
+    send({ state: 'available', version: info.version })
+  })
+  autoUpdater.on('update-not-available', () => {
+    knownUpdateVersion = null
+    send({ state: 'not-available' })
+  })
   autoUpdater.on('download-progress', (progress) => send({ state: 'downloading', percent: Math.round(progress.percent) }))
   autoUpdater.on('update-downloaded', (info) => send({ state: 'downloaded', version: info.version }))
-  autoUpdater.on('error', (err) => send({ state: 'error', message: err.message }))
+  autoUpdater.on('error', (err) => {
+    if (knownUpdateVersion) {
+      send({ state: 'blocked', version: knownUpdateVersion })
+    } else {
+      send({ state: 'error', message: err.message })
+    }
+  })
 
   // Only the renderer-visible "restart & install" action is user-triggered
   // (see WelcomeStep) - the check-and-download itself runs automatically

@@ -132,6 +132,32 @@ export function WelcomeStep({
           <span className="welcome-step__version">v{APP_VERSION}</span>
           <h1 className="welcome-step__title">{step.title}</h1>
           <p className="welcome-step__subtitle">{step.subtitle}</p>
+
+          {/* Deliberately more prominent than a small text link below the
+              CTA - a real update being ready is worth noticing before
+              starting a 10-minute guided install, not something to bury. */}
+          {(update?.state === 'downloaded' || update?.state === 'blocked') && (
+            <div className="welcome-step__update-banner">
+              <span className="welcome-step__update-banner-tag">Update recommended</span>
+              <p className="welcome-step__update-banner-text">
+                {update.state === 'downloaded'
+                  ? `Version ${update.version} is downloaded and ready to install.`
+                  : `Version ${update.version} is available.`}
+              </p>
+              <button
+                type="button"
+                className="welcome-step__update-banner-btn"
+                onClick={() =>
+                  update.state === 'downloaded'
+                    ? window.api?.update.quitAndInstall()
+                    : window.api?.openExternal('https://github.com/Filmatura/magic-lantern-installer/releases/latest')
+                }
+              >
+                {update.state === 'downloaded' ? 'Restart to update' : 'Download manually'} →
+              </button>
+            </div>
+          )}
+
           <Button size="lg" withArrow onClick={onNext} className="welcome-step__cta">
             Get started
           </Button>
@@ -139,20 +165,6 @@ export function WelcomeStep({
             <span className="welcome-step__update welcome-step__update--passive">
               Downloading update... {update.percent}%
             </span>
-          )}
-          {update?.state === 'downloaded' && (
-            <button type="button" className="welcome-step__update" onClick={() => window.api?.update.quitAndInstall()}>
-              Restart to update - v{update.version} →
-            </button>
-          )}
-          {update?.state === 'error' && (
-            <button
-              type="button"
-              className="welcome-step__update"
-              onClick={() => window.api?.openExternal('https://github.com/Filmatura/magic-lantern-installer/releases/latest')}
-            >
-              Download latest version →
-            </button>
           )}
         </div>
         <p className="welcome-step__footnote">Takes about 10 minutes. We'll guide you through every step.</p>
