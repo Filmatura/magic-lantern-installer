@@ -17,38 +17,45 @@ export interface BuildDefinition {
   bundledFolder?: string
   /** owner/repo on GitHub to fetch the latest release from - only set for source: 'remote'. */
   githubRepo?: string
+  /** "Read more" link shown on the build's card - the original creator's repo/profile/forum thread. */
+  moreInfoUrl?: string
 }
 
 export const BUILD_OPTIONS: BuildDefinition[] = [
   {
     id: 'filmatura',
     label: "Filmatura's Crop Mood",
-    description: "Filmatura's actively maintained fork of Amit's Crop Mood Slim, downloaded fresh each time. Recommended for everyone.",
+    description:
+      "Filmatura's actively maintained fork of Amit's Crop Mood Slim, downloaded fresh each time. Includes small visual tweaks and customisations. Recommended for everyone.",
     source: 'remote',
     recommended: true,
-    githubRepo: 'Filmatura/crop-mood-filmatura'
+    githubRepo: 'Filmatura/crop-mood-filmatura',
+    moreInfoUrl: 'https://github.com/Filmatura/crop-mood-filmatura'
   },
   {
     id: 'amit',
     label: "Amit's Crop Mood Slim",
-    description: "The original build this fork is based on, still actively maintained by Amit. Downloaded fresh each time.",
+    description: 'The original build this fork is based on, actively maintained by Amit. Downloaded fresh each time.',
     source: 'remote',
     tagLabel: 'Actively maintained',
-    githubRepo: 'Amit199167/Crop-mood-eosm-slim-gui'
+    githubRepo: 'Amit199167/Crop-mood-eosm-slim-gui',
+    moreInfoUrl: 'https://github.com/Amit199167'
   },
   {
     id: 'danne-tweaks',
     label: 'Crop Mood + Danne Tweaks (24fps fix)',
-    description: "A community variant with a 24fps tweak layered on. Only use this if you specifically need that fix - Filmatura's build is recommended otherwise.",
+    description: "Danne's variant of Crop Mood with a 24fps fix. Only use this if you know what you're doing.",
     source: 'bundled',
-    bundledFolder: 'danne-tweaks'
+    bundledFolder: 'danne-tweaks',
+    moreInfoUrl: 'https://www.magiclantern.fm/forum/index.php?topic=27084.25'
   },
   {
     id: 'crop-mood',
     label: 'Crop Mood',
-    description: "An older community variant. Not actively maintained - Filmatura's build is strongly recommended instead.",
+    description: "Bilal's original Crop Mood build for the EOS M. Only use this if you know what you're doing.",
     source: 'bundled',
-    bundledFolder: 'crop-mood'
+    bundledFolder: 'crop-mood',
+    moreInfoUrl: 'https://www.magiclantern.fm/forum/index.php?topic=26851.0'
   }
 ]
 

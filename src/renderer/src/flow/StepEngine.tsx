@@ -66,7 +66,7 @@ export function StepEngine(): React.JSX.Element {
       case 'troubleshoot':
         return <TroubleshootStep step={step} onNext={goNext} />
       case 'outro':
-        return <OutroStep step={step} />
+        return <OutroStep step={step} onGoto={goto} />
     }
   })()
 

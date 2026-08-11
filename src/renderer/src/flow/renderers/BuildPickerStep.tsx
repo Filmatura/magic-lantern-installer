@@ -15,6 +15,13 @@ export function BuildPickerStep({
 }): React.JSX.Element {
   const [selected, setSelected] = useState(selectedId)
 
+  const openMoreInfo = (e: React.MouseEvent, url: string): void => {
+    // The card itself is the selection control - without this, clicking
+    // "Read more" would also select the card underneath it.
+    e.stopPropagation()
+    void window.api?.openExternal(url)
+  }
+
   return (
     <StepShell
       eyebrow={step.eyebrow}
@@ -29,13 +36,17 @@ export function BuildPickerStep({
     >
       <div className="build-picker__list">
         {step.options.map((option) => (
-          <button
+          <div
             key={option.id}
-            type="button"
+            role="button"
+            tabIndex={0}
             className={`build-picker__card ${selected === option.id ? 'build-picker__card--selected' : ''} ${
               option.recommended ? 'build-picker__card--recommended' : ''
             }`}
             onClick={() => setSelected(option.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setSelected(option.id)
+            }}
           >
             <div className="build-picker__card-top">
               <span className="build-picker__label">{option.label}</span>
@@ -44,7 +55,12 @@ export function BuildPickerStep({
               </span>
             </div>
             <p className="build-picker__description">{option.description}</p>
-          </button>
+            {option.moreInfoUrl && (
+              <button type="button" className="build-picker__more" onClick={(e) => openMoreInfo(e, option.moreInfoUrl!)}>
+                Read more →
+              </button>
+            )}
+          </div>
         ))}
       </div>
     </StepShell>

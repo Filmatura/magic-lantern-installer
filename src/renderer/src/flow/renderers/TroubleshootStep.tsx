@@ -5,6 +5,10 @@ import type { TroubleshootStep as TroubleshootStepDef } from '@renderer/flow/typ
 import './TroubleshootStep.css'
 
 export function TroubleshootStep({ step, onNext }: { step: TroubleshootStepDef; onNext: () => void }): React.JSX.Element {
+  const open = (url: string): void => {
+    void window.api?.openExternal(url)
+  }
+
   return (
     <StepShell
       eyebrow={step.eyebrow}
@@ -25,6 +29,15 @@ export function TroubleshootStep({ step, onNext }: { step: TroubleshootStepDef; 
           </div>
         ))}
       </div>
+      {step.communityLinks.length > 0 && (
+        <div className="troubleshoot-step__community">
+          {step.communityLinks.map((link) => (
+            <button key={link.url} type="button" className="troubleshoot-step__community-btn" onClick={() => open(link.url)}>
+              {link.label}
+            </button>
+          ))}
+        </div>
+      )}
       <TidioChat />
     </StepShell>
   )
