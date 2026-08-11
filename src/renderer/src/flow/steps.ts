@@ -53,7 +53,7 @@ export const steps: StepDef[] = [
     title: 'Enable release shutter without lens',
     media: { kind: 'video', src: shutterReleaseVideo },
     body: [
-      'Turn on the camera.',
+      'Turn on the camera and switch it to Photo mode (mode dial around the shutter button).',
       'Press MENU, go to Settings (first page from the right), scroll down to Custom Functions (C.Fn), and press OK.',
       'Press left once to get to page 7.',
       'Press OK to open the selection, choose Enable, then press OK again.'
@@ -103,6 +103,7 @@ export const steps: StepDef[] = [
     eyebrow: 'Canon firmware 2.0.2',
     title: "We'll prep your card with the right Canon firmware",
     body: [
+      'Insert your SD card into your reader.',
       'Magic Lantern requires Canon firmware 2.0.2 exactly. We\'ll format your SD card and load the official 2.0.2 firmware onto it automatically - nothing to download or configure yourself.',
       "If your camera is on a different firmware version, don't worry: this won't brick anything. Worst case is a harmless error screen you clear by pulling the battery."
     ],
@@ -134,7 +135,8 @@ export const steps: StepDef[] = [
     media: { kind: 'video', src: firmwareUpdateVideo },
     body: [
       'Put the card we just flashed into your EOS M.',
-      'Press MENU to go to Settings, second page from the right, scroll down to "Firmware Ver.:", press OK, then press OK again to start the update.',
+      'Turn on the camera.',
+      'Press MENU to go to Settings, rightmost wrench icon with 4 dots, scroll down to "Firmware Ver.:", select EOSM1202.FIR and press OK, then select it again and press OK again.',
       'Wait for the confirmation screen, then press OK and restart the camera.'
     ],
     cta: "I've updated the firmware",
@@ -167,7 +169,8 @@ export const steps: StepDef[] = [
     type: 'drive-picker',
     eyebrow: 'One more check',
     title: 'Reselect your card',
-    subtitle: "Your card just went through the camera for the firmware update, so its listing may have changed. Pick it again to make sure we've got the right one before we format anything.",
+    subtitle:
+      "Turn off the camera, take out the SD card, and put it back in your reader. Your card just went through the camera for the firmware update, so its listing may have changed - pick it again to make sure we've got the right one before we format anything.",
     maxSizeGb: 256,
     recommendedSizeRangeGb: [230, 260],
     clearPriorSelection: true,
@@ -200,7 +203,7 @@ export const steps: StepDef[] = [
     body: [
       'Insert the SD card we just installed Magic Lantern on.',
       'Turn on the camera, and rotate the mode dial (around the shutter button) to Photo mode.',
-      'Go to Settings, second page from the right, scroll down to "Firmware ver.: 2.0.2", press OK, then press OK again. Magic Lantern will now install.',
+      'Go to Settings, rightmost wrench icon with 4 dots, scroll down to "Firmware ver.: 2.0.2", press OK, then press OK again and wait a couple seconds. Magic Lantern will now install.',
       'When prompted, restart your camera. You will now boot into Magic Lantern.'
     ],
     cta: 'Continue',
