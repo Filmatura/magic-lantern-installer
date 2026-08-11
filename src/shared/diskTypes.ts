@@ -13,6 +13,15 @@ export interface DiskDevice {
   mountPath: string | null
   /** Best-effort bus/media description for display (e.g. "USB", "SD"). */
   kind: string
+  /**
+   * Set when this drive was selected via the drive-picker's "Advanced:
+   * show all drives" override - carried on the device object itself
+   * (rather than separate app state) since `selectedDrive` already flows
+   * everywhere formatting happens. Relaxes the size/removable checks at
+   * format time, but never the boot-disk exclusion - that's enforced
+   * independently in listDrives() and can't be bypassed by this flag.
+   */
+  override?: boolean
 }
 
 export interface FormatResult {
@@ -27,6 +36,14 @@ export interface FormatResult {
  * format command runs). Nothing above this size is ever eligible.
  */
 export const MAX_DRIVE_SIZE_GB = 256
+
+/**
+ * Still-sane upper bound even in the drive-picker's advanced override mode
+ * (e.g. someone genuinely using a larger card) - not a real safety
+ * mechanism like the boot-disk exclusion, just a guard against an
+ * obviously-wrong selection like a large external backup drive.
+ */
+export const MAX_DRIVE_SIZE_GB_OVERRIDE = 2048
 
 export const VOLUME_LABEL = 'ML_CARD'
 

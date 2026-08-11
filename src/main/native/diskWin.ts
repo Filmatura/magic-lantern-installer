@@ -35,18 +35,28 @@ async function findMountPath(diskNumber: number): Promise<string | null> {
 
 /**
  * Filters to USB/SD bus type disks - Windows' internal boot disk is SATA/
- * NVMe/RAID, so it structurally never appears in this list.
+ * NVMe/RAID, so it structurally never appears in this list. `-not $_.IsBoot
+ * -and -not $_.IsSystem` is an explicit second, independent exclusion on
+ * top of that bus-type filter (belt and suspenders, same approach as the
+ * mac backend), and stays in effect even in `includeInternal` mode - that
+ * mode only widens which bus types are eligible, never bypasses this.
+ *
+ * `includeInternal` (drive-picker's advanced override) drops the USB/SD
+ * bus-type restriction entirely - for a card in a built-in reader that
+ * Windows might report under a different bus type - relying solely on the
+ * IsBoot/IsSystem check to keep the actual system disk out.
  *
  * Unverified: written against documented PowerShell cmdlet behavior, no
  * Windows machine was available to actually run this against real
  * hardware. Treat as a first draft that needs testing on a real PC before
  * being trusted with a real card.
  */
-export async function listDrives(): Promise<DiskDevice[]> {
+export async function listDrives(includeInternal = false): Promise<DiskDevice[]> {
+  const busFilter = includeInternal ? '' : "($_.BusType -eq 'USB' -or $_.BusType -eq 'SD') -and "
   let raw: string
   try {
     raw = await runPowerShell(
-      "Get-Disk | Where-Object { $_.BusType -eq 'USB' -or $_.BusType -eq 'SD' } | Select-Object Number,FriendlyName,Size,BusType | ConvertTo-Json"
+      `Get-Disk | Where-Object { ${busFilter}-not $_.IsBoot -and -not $_.IsSystem } | Select-Object Number,FriendlyName,Size,BusType | ConvertTo-Json`
     )
   } catch {
     return []

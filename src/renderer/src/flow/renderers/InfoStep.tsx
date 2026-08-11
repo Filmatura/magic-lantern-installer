@@ -22,6 +22,11 @@ export function InfoStep({
         <>
           {step.secondaryAction && (
             <Button variant="secondary" onClick={() => onGoto(step.secondaryAction!.goto)}>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
+                <circle cx="7.5" cy="7.5" r="6.25" />
+                <path d="M5.7 5.8a1.8 1.8 0 1 1 2.7 1.6c-.7.4-1.1.8-1.1 1.6" />
+                <circle cx="7.5" cy="10.7" r="0.2" fill="currentColor" stroke="none" />
+              </svg>
               {step.secondaryAction.label}
             </Button>
           )}

@@ -67,7 +67,7 @@ export async function runSubStep(
         return
       }
       ctx.log('Copying EOSM1202.FIR to card...')
-      const result = await window.api.firmware.installToDrive(drive.id)
+      const result = await window.api.firmware.installToDrive(drive.id, drive.override)
       if (!result.ok) throw new Error(result.error ?? 'Firmware copy failed.')
       ctx.log('Canon firmware copied to card.', 'success')
       return
@@ -118,7 +118,7 @@ export async function runSubStep(
         return
       }
       ctx.log(`Copying files to ${drive.name}...`)
-      const result = await window.api.ml.copyToDrive(carry.extractedDir, drive.id)
+      const result = await window.api.ml.copyToDrive(carry.extractedDir, drive.id, drive.override)
       if (!result.ok) throw new Error(result.error ?? 'Copy failed.')
       ctx.log('Copy complete.', 'success')
       return
@@ -153,7 +153,11 @@ async function ejectDrive(drive: DriveOption, ctx: ActionContext, fake: boolean)
   ctx.log('Please remove the card now - waiting for it to be physically removed...')
   for (;;) {
     await wait(1000)
-    const drives = await window.api.disk.list()
+    // Must match the scope the drive was originally found under - an
+    // override-selected drive (e.g. a built-in reader's internal media)
+    // wouldn't appear in a default-scope list at all, which would make
+    // this look "already removed" on the very first poll.
+    const drives = await window.api.disk.list(drive.override)
     if (!drives.some((d) => d.id === drive.id)) break
   }
   ctx.log('Card safely ejected.', 'success')
@@ -167,7 +171,7 @@ async function formatDrive(drive: DriveOption, ctx: ActionContext, fake: boolean
     return { selectedDrive: drive }
   }
   ctx.log(`Formatting ${drive.name} to exFAT...`)
-  const result = await window.api.disk.format(drive.id)
+  const result = await window.api.disk.format(drive.id, drive.override)
   if (!result.ok) throw new Error(result.error ?? 'Format failed.')
   ctx.log('Format complete.', 'success')
   return { selectedDrive: { ...drive, mountPath: result.mountPath } }

@@ -84,19 +84,68 @@ async function describeDisk(listOut: string, diskId: string): Promise<DiskDevice
 }
 
 /**
- * Only ever queries `external, physical` disks - diskutil structurally
- * excludes the internal/system disk from this list, so there is no code
- * path here that can even see, let alone target, the machine's boot drive.
+ * The physical disk backing the boot volume (e.g. "disk0") - resolved
+ * fresh on every call rather than cached, and used to exclude the system
+ * disk explicitly and unconditionally in listDrives(), independent of
+ * whatever diskutil scope was queried. This is what actually guarantees
+ * the boot disk is never returned in advanced/override mode - the
+ * external/internal split alone isn't enough once internal disks are
+ * back in scope.
+ *
+ * On APFS (the default since macOS 10.13, i.e. virtually every real Mac
+ * this runs on), `diskutil info /`'s "Part of Whole" is the synthesized
+ * APFS *container* id (e.g. "disk3"), not a physical disk - that
+ * container never appears in `diskutil list physical` at all, so
+ * comparing against it directly would silently never match anything and
+ * defeat this exclusion entirely. The container's "APFS Physical Store"
+ * field (e.g. "disk0s2") points at the real underlying partition, whose
+ * own "Part of Whole" (e.g. "disk0") is the actual physical whole-disk id
+ * that shows up in listings. Verified this chain against a real APFS Mac.
  */
-export async function listDrives(): Promise<DiskDevice[]> {
+async function getBootDiskId(): Promise<string | null> {
+  try {
+    const rootInfo = await run('diskutil', ['info', '/'])
+    const partOfWhole = parseInfoField(rootInfo, 'Part of Whole')
+    if (!partOfWhole) return null
+
+    const containerInfo = await run('diskutil', ['info', partOfWhole])
+    const physicalStore = parseInfoField(containerInfo, 'APFS Physical Store')
+    if (!physicalStore) return partOfWhole // Not APFS - already a physical disk id.
+
+    const storeInfo = await run('diskutil', ['info', physicalStore])
+    return parseInfoField(storeInfo, 'Part of Whole') ?? partOfWhole
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Normally only ever queries `external, physical` disks - diskutil
+ * structurally excludes the internal/system disk from this list, so there
+ * is no code path here that can even see, let alone target, the machine's
+ * boot drive.
+ *
+ * `includeInternal` (drive-picker's advanced override, for cards sitting
+ * in a built-in reader that diskutil classifies as "internal" media even
+ * though the card itself is removable) widens the query to
+ * `diskutil list physical` - internal AND external. The boot disk is
+ * excluded explicitly via getBootDiskId() in that case, as a second,
+ * independent check on top of whatever diskutil itself reports - not
+ * something the override flag can ever bypass.
+ */
+export async function listDrives(includeInternal = false): Promise<DiskDevice[]> {
+  const bootDiskId = includeInternal ? await getBootDiskId() : null
+
   let listOut: string
   try {
-    listOut = await run('diskutil', ['list', 'external', 'physical'])
+    listOut = await run('diskutil', includeInternal ? ['list', 'physical'] : ['list', 'external', 'physical'])
   } catch {
     return []
   }
 
-  const ids = [...listOut.matchAll(/^\/dev\/(disk\d+)\s*\(external, physical\):/gm)].map((m) => m[1])
+  const busPattern = includeInternal ? '(?:external|internal)' : 'external'
+  const idPattern = new RegExp(`^\\/dev\\/(disk\\d+)\\s*\\(${busPattern}, physical\\):`, 'gm')
+  const ids = [...listOut.matchAll(idPattern)].map((m) => m[1]).filter((id) => id !== bootDiskId)
   const drives: DiskDevice[] = []
 
   for (const id of ids) {
