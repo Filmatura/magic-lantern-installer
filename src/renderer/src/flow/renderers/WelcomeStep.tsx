@@ -23,7 +23,15 @@ const WELCOME_VIDEO_PLAYLIST = [
 
 const MAX_LOAD_ATTEMPTS = WELCOME_VIDEO_PLAYLIST.length * 2
 
-export function WelcomeStep({ step, onNext }: { step: WelcomeStepDef; onNext: () => void }): React.JSX.Element {
+export function WelcomeStep({
+  step,
+  onNext,
+  onGoto
+}: {
+  step: WelcomeStepDef
+  onNext: () => void
+  onGoto: (stepId: string) => void
+}): React.JSX.Element {
   const [update, setUpdate] = useState<UpdateStatus | null>(null)
   // Two persistent <video> elements, only one visible at a time. Setting
   // `.src` on a single video element forces it through a blank/no-data
@@ -140,6 +148,13 @@ export function WelcomeStep({ step, onNext }: { step: WelcomeStepDef; onNext: ()
         </div>
         <p className="welcome-step__footnote">Takes about 10 minutes. We'll guide you through every step.</p>
       </div>
+      <button
+        type="button"
+        className="welcome-step__quick-mode"
+        onClick={() => onGoto('quick-mode-drive-picker')}
+      >
+        Quick Mode (Advanced users)
+      </button>
     </div>
   )
 }

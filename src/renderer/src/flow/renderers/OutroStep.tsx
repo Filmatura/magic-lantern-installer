@@ -153,12 +153,25 @@ export function OutroStep({
 
       <div className="outro-step__footer">
         <Button variant="secondary" onClick={reset}>
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+            <path d="M2.5 7.5a5 5 0 1 1 1.9 3.9" />
+            <path d="M2.5 11.2V7.5H6.2" />
+          </svg>
           Start over
         </Button>
         <Button variant="secondary" onClick={() => onGoto('troubleshoot')}>
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
+            <circle cx="7.5" cy="7.5" r="6.25" />
+            <path d="M5.7 5.8a1.8 1.8 0 1 1 2.7 1.6c-.7.4-1.1.8-1.1 1.6" />
+            <circle cx="7.5" cy="10.7" r="0.2" fill="currentColor" stroke="none" />
+          </svg>
           Having trouble?
         </Button>
         <Button variant="secondary" onClick={quit}>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
+            <line x1="2" y1="2" x2="11" y2="11" />
+            <line x1="11" y1="2" x2="2" y2="11" />
+          </svg>
           Close app
         </Button>
       </div>

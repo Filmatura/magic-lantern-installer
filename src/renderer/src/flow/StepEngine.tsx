@@ -22,7 +22,7 @@ export function StepEngine(): React.JSX.Element {
     if ('next' in step && step.next) goto(step.next, setState)
   }
 
-  const bareChrome = step.type === 'welcome' || step.type === 'outro'
+  const bareChrome = step.type === 'welcome' || step.type === 'outro' || step.bareChrome === true
 
   // Total step count - and the current step's position within it - depend
   // on which branch the firmware question resolves to, so this is
@@ -38,7 +38,7 @@ export function StepEngine(): React.JSX.Element {
   const body = (() => {
     switch (step.type) {
       case 'welcome':
-        return <WelcomeStep step={step} onNext={goNext} />
+        return <WelcomeStep step={step} onNext={goNext} onGoto={goto} />
       case 'checklist':
         return <ChecklistStep step={step} onNext={goNext} />
       case 'info':
