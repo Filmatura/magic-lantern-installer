@@ -54,7 +54,7 @@ export const steps: StepDef[] = [
     media: { kind: 'video', src: shutterReleaseVideo },
     body: [
       'Turn on the camera and switch it to Photo mode (mode dial around the shutter button).',
-      'Press MENU, go to Settings (first page from the right), scroll down to Custom Functions (C.Fn), and press OK.',
+      'Press MENU, go to Settings (rightmost wrench icon with 4 dots), scroll down to Custom Functions (C.Fn), and press OK.',
       'Press left once to get to page 7.',
       'Press OK to open the selection, choose Enable, then press OK again.'
     ],
