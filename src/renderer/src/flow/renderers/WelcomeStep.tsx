@@ -145,6 +145,15 @@ export function WelcomeStep({
               Restart to update - v{update.version} →
             </button>
           )}
+          {update?.state === 'error' && (
+            <button
+              type="button"
+              className="welcome-step__update"
+              onClick={() => window.api?.openExternal('https://github.com/Filmatura/magic-lantern-installer/releases/latest')}
+            >
+              Download latest version →
+            </button>
+          )}
         </div>
         <p className="welcome-step__footnote">Takes about 10 minutes. We'll guide you through every step.</p>
       </div>

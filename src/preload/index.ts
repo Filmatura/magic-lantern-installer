@@ -28,8 +28,10 @@ const api = {
   quit: (): Promise<void> => ipcRenderer.invoke('app:quit'),
 
   disk: {
-    list: (): Promise<DiskDevice[]> => ipcRenderer.invoke('disk:list'),
-    format: (deviceId: string): Promise<FormatResult> => ipcRenderer.invoke('disk:format', deviceId),
+    /** `includeInternal` is the drive-picker's advanced override - widens the scan to include internal-media drives (e.g. a card in a built-in reader), never the boot disk. */
+    list: (includeInternal?: boolean): Promise<DiskDevice[]> => ipcRenderer.invoke('disk:list', includeInternal),
+    /** `override` relaxes the removable/size safety checks for a drive selected via the advanced override - the boot-disk exclusion itself can't be bypassed by this. */
+    format: (deviceId: string, override?: boolean): Promise<FormatResult> => ipcRenderer.invoke('disk:format', deviceId, override),
     eject: (deviceId: string): Promise<CopyResult> => ipcRenderer.invoke('disk:eject', deviceId)
   },
 
@@ -37,12 +39,13 @@ const api = {
     resolveBundledBuild: (buildId: string): Promise<BundledBuildResult> => ipcRenderer.invoke('ml:resolveBundledBuild', buildId),
     downloadAndExtract: (zipUrl: string, zipName: string): Promise<DownloadResult> =>
       ipcRenderer.invoke('ml:downloadAndExtract', zipUrl, zipName),
-    copyToDrive: (sourceDir: string, deviceId: string): Promise<CopyResult> =>
-      ipcRenderer.invoke('ml:copyToDrive', sourceDir, deviceId)
+    copyToDrive: (sourceDir: string, deviceId: string, override?: boolean): Promise<CopyResult> =>
+      ipcRenderer.invoke('ml:copyToDrive', sourceDir, deviceId, override)
   },
 
   firmware: {
-    installToDrive: (deviceId: string): Promise<CopyResult> => ipcRenderer.invoke('firmware:installToDrive', deviceId)
+    installToDrive: (deviceId: string, override?: boolean): Promise<CopyResult> =>
+      ipcRenderer.invoke('firmware:installToDrive', deviceId, override)
   },
 
   /** Streams log lines from any long-running main-process task (format, download, copy). Returns an unsubscribe function. */

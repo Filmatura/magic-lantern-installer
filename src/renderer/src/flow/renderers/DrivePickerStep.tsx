@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@renderer/components/Button'
 import { StepShell } from '@renderer/components/StepShell'
-import { makeFakeDrive } from '@shared/diskTypes'
+import { makeFakeDrive, MAX_DRIVE_SIZE_GB_OVERRIDE } from '@shared/diskTypes'
 import type { DriveOption, DrivePickerStep as DrivePickerStepDef } from '@renderer/flow/types'
 import './DrivePickerStep.css'
 
@@ -19,26 +19,33 @@ export function DrivePickerStep({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fakeDriveAdded, setFakeDriveAdded] = useState(false)
+  // Advanced override: widens the scan to include drives normally hidden
+  // for safety (non-removable, over the size cap, or sitting in a
+  // built-in reader diskutil/Windows classifies as internal media). The
+  // one thing this can never do is surface the system/boot disk - that
+  // exclusion lives in the main process's listDrives() itself, not here.
+  const [advanced, setAdvanced] = useState(false)
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback((includeInternal: boolean) => {
     setLoading(true)
     setError(null)
     window.api.disk
-      .list()
+      .list(includeInternal)
       .then(setDrives)
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setLoading(false))
   }, [])
 
   useEffect(() => {
-    refresh()
-  }, [refresh])
+    refresh(advanced)
+  }, [refresh, advanced])
 
   const allDrives = [...(drives ?? []), ...(fakeDriveAdded ? [makeFakeDrive()] : [])]
   const selectedDrive = allDrives.find((d) => d.id === selected) ?? null
   const [minRecommended, maxRecommended] = step.recommendedSizeRangeGb
   const isOffRecommendedSize =
     !!selectedDrive && (selectedDrive.sizeGb < minRecommended || selectedDrive.sizeGb > maxRecommended)
+  const sizeCap = advanced ? MAX_DRIVE_SIZE_GB_OVERRIDE : step.maxSizeGb
 
   return (
     <StepShell
@@ -47,7 +54,12 @@ export function DrivePickerStep({
       subtitle={step.subtitle}
       media={step.media}
       primary={
-        <Button size="lg" withArrow disabled={!selectedDrive} onClick={() => selectedDrive && onNext(selectedDrive)}>
+        <Button
+          size="lg"
+          withArrow
+          disabled={!selectedDrive}
+          onClick={() => selectedDrive && onNext(advanced ? { ...selectedDrive, override: true } : selectedDrive)}
+        >
           Continue
         </Button>
       }
@@ -64,8 +76,8 @@ export function DrivePickerStep({
         <div className="drive-picker__list">
           {allDrives.map((drive) => {
             const isFake = drive.id === makeFakeDrive().id
-            const tooLarge = !isFake && drive.sizeGb > step.maxSizeGb
-            const ineligible = tooLarge || (!isFake && !drive.removable)
+            const tooLarge = !isFake && drive.sizeGb > sizeCap
+            const ineligible = tooLarge || (!isFake && !advanced && !drive.removable)
             return (
               <button
                 key={drive.id}
@@ -81,8 +93,9 @@ export function DrivePickerStep({
                   <span className="drive-picker__name">{drive.name}</span>
                   <span className="drive-picker__meta">
                     {drive.sizeGb} GB · {drive.kind}
-                    {tooLarge && ` - larger than ${step.maxSizeGb} GB, hidden for safety`}
-                    {!tooLarge && !isFake && !drive.removable && ' - not removable, hidden for safety'}
+                    {tooLarge && ` - larger than ${sizeCap} GB, hidden for safety`}
+                    {!tooLarge && !advanced && !isFake && !drive.removable && ' - not removable, hidden for safety'}
+                    {!tooLarge && advanced && !isFake && !drive.removable && ' - not normally shown (non-removable)'}
                   </span>
                 </span>
                 {selected === drive.id && !ineligible && (
@@ -103,14 +116,25 @@ export function DrivePickerStep({
         </div>
       )}
 
+      {advanced && (
+        <div className="drive-picker__override-note">
+          Advanced mode: showing every drive except this computer's system disk, including ones normally hidden for
+          size or removability. Double-check you've picked the right card before continuing.
+        </div>
+      )}
+
       <div className="drive-picker__footer-row">
-        <button type="button" className="drive-picker__refresh" onClick={refresh} disabled={loading}>
+        <button type="button" className="drive-picker__refresh" onClick={() => refresh(advanced)} disabled={loading}>
           {loading ? 'Refreshing...' : 'Refresh drives'}
         </button>
         <p className="drive-picker__footnote">
           Only removable drives up to {step.maxSizeGb} GB are shown, so your Mac or PC's own storage is never touched.
         </p>
       </div>
+
+      <button type="button" className="drive-picker__advanced-link" onClick={() => setAdvanced((v) => !v)}>
+        {advanced ? 'Advanced: back to normal view' : "Advanced: card not showing up? Override"}
+      </button>
 
       {import.meta.env.DEV && !fakeDriveAdded && (
         <button type="button" className="drive-picker__dev-btn" onClick={() => setFakeDriveAdded(true)}>

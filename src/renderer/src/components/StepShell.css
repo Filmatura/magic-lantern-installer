@@ -10,15 +10,19 @@
 }
 
 .step-shell__inner {
-  max-width: 620px;
+  /* Fluid instead of a flat cap, so a maximized/fullscreen window actually
+     gets used instead of leaving empty space on either side. */
+  max-width: min(92vw, 620px);
   margin: 0 auto;
   padding: var(--space-7) var(--space-7) var(--space-5);
 }
 
 /* Wider when a step has media next to its steps, so the two columns
-   below have room to breathe instead of getting cramped. */
+   below have room to breathe instead of getting cramped - and grows much
+   further on large windows, since this is the layout people actually
+   maximize/fullscreen for. */
 .step-shell__inner:has(.step-shell__media-row) {
-  max-width: 920px;
+  max-width: min(92vw, 1400px);
 }
 
 .step-shell__media-row {
@@ -28,18 +32,74 @@
   margin-top: var(--space-5);
 }
 
+.step-shell__media-row--expanded {
+  flex-direction: column;
+}
+
 .step-shell__media-col {
   flex: 0 0 50%;
   min-width: 0;
+  position: relative;
+}
+
+.step-shell__media-row--expanded .step-shell__media-col {
+  flex: 1 1 auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Caps the expanded video to roughly what's left of the window after the
+   header, this step's own title block, and the footer - without this it
+   scales purely off width and can end up taller than the visible area,
+   getting cropped instead of shrinking to fit. The 320px estimate covers
+   header (~64px) + title/subtitle (~90px avg) + footer (~100px) + margins;
+   generous on purpose so it errs toward "slightly smaller than it could
+   be" rather than risking overflow again. */
+.step-shell__media-row--expanded .video-player__el {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100vh - 320px);
 }
 
 .step-shell__media-col .media-slot {
   margin: 0;
 }
 
+.step-shell__media-toggle {
+  appearance: none;
+  cursor: pointer;
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 3;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background 0.15s ease;
+}
+
+.step-shell__media-toggle:hover {
+  background: rgba(0, 0, 0, 0.62);
+}
+
 .step-shell__content-col {
   flex: 1;
   min-width: 0;
+}
+
+.step-shell__media-row--expanded .step-shell__content-col {
+  flex: 1 1 auto;
+  width: 100%;
 }
 
 .step-shell__content-col .info-step__body {
