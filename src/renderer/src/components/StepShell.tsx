@@ -26,8 +26,16 @@ export function StepShell({ eyebrow, title, subtitle, media, children, primary, 
           {eyebrow && <div className="step-shell__eyebrow">{eyebrow}</div>}
           <h1 className="step-shell__title">{title}</h1>
           {subtitle && <p className="step-shell__subtitle">{subtitle}</p>}
-          <MediaSlot media={media} />
-          {children}
+          {media ? (
+            <div className="step-shell__media-row">
+              <div className="step-shell__media-col">
+                <MediaSlot media={media} />
+              </div>
+              <div className="step-shell__content-col">{children}</div>
+            </div>
+          ) : (
+            children
+          )}
         </div>
       </div>
       <div className="step-shell__footer">
