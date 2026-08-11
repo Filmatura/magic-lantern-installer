@@ -129,7 +129,10 @@ export function WelcomeStep({
       <div className="welcome-step__card">
         <div className="welcome-step__content">
           <img src={filmaturaBlack} alt="Filmatura" className="welcome-step__brand" />
-          <span className="welcome-step__version">v{APP_VERSION}</span>
+          <span className="welcome-step__version">
+            v{APP_VERSION}
+            {update?.state === 'not-available' && <span className="welcome-step__version-check"> · Up to date</span>}
+          </span>
           <h1 className="welcome-step__title">{step.title}</h1>
           <p className="welcome-step__subtitle">{step.subtitle}</p>
 
