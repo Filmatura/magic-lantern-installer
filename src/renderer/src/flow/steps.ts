@@ -145,8 +145,14 @@ export const steps: StepDef[] = [
     type: 'question',
     title: 'Does your camera now show firmware 2.0.2?',
     hideFromProgress: true,
+    // No setState here on purpose - `firmwareReady` is what marks this
+    // user as being on the long branch for progress-bar purposes
+    // (see resolveDefaultNext below). Flipping it back to true here once
+    // confirmed would make computeVisiblePath think we're back on the
+    // short 8-step path even though we're deep in the long one, freezing
+    // the progress bar at a stale "8/8" for the rest of the flow.
     options: [
-      { label: 'Yes, confirmed', goto: 'reselect-drive', setState: { firmwareReady: true }, tone: 'primary' },
+      { label: 'Yes, confirmed', goto: 'reselect-drive', tone: 'primary' },
       { label: 'Something went wrong', goto: 'firmware-path-intro' }
     ]
   },
@@ -252,6 +258,44 @@ export const steps: StepDef[] = [
       { label: 'Join our Facebook group', url: 'https://www.facebook.com/groups/filmatura' }
     ],
     next: 'first-boot'
+  },
+  {
+    // Reached only via the discreet "Quick Mode" link on the welcome
+    // screen - never through the main `next` chain, so it's naturally
+    // excluded from computeVisiblePath (no progress tracking) and marked
+    // bareChrome (no header at all) to match: no guided steps, no tips,
+    // just pick a card and go.
+    id: 'quick-mode-drive-picker',
+    type: 'drive-picker',
+    bareChrome: true,
+    hideFromProgress: true,
+    eyebrow: 'Quick Mode',
+    title: 'Select your SD card',
+    subtitle: "We'll only ever write to this card - nothing else on your computer.",
+    maxSizeGb: 256,
+    recommendedSizeRangeGb: [230, 260],
+    next: 'quick-mode-install'
+  },
+  {
+    id: 'quick-mode-install',
+    type: 'auto',
+    bareChrome: true,
+    hideFromProgress: true,
+    eyebrow: 'Quick Mode - automatic',
+    title: 'Install Magic Lantern',
+    subtitle: "We'll download the latest build, format your card, and copy everything over - all in one go.",
+    action: 'install-magic-lantern',
+    destructive: true,
+    confirmCopy: 'This erases everything currently on the card. Hold for 3 seconds to confirm.',
+    allowBuildChange: false,
+    subSteps: [
+      { id: 'download', label: 'Prepare Magic Lantern build' },
+      { id: 'format', label: 'Format SD card' },
+      { id: 'copy', label: 'Copy files to card' },
+      { id: 'eject', label: 'Eject card' }
+    ],
+    successCopy: 'Magic Lantern is installed and safely ejected.',
+    next: 'outro'
   },
   {
     id: 'outro',

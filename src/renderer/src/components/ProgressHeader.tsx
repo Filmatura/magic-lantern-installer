@@ -12,12 +12,12 @@ export function ProgressHeader({ stepNumber, totalSteps }: ProgressHeaderProps):
     <header className="progress-header">
       <div className="progress-header__row">
         <img src={filmaturaBlack} alt="Filmatura" className="progress-header__logo" />
+        <div className="progress-header__track">
+          <div className="progress-header__fill" style={{ width: `${pct}%` }} />
+        </div>
         <span className="progress-header__count">
           {stepNumber} / {totalSteps}
         </span>
-      </div>
-      <div className="progress-header__track">
-        <div className="progress-header__fill" style={{ width: `${pct}%` }} />
       </div>
     </header>
   )

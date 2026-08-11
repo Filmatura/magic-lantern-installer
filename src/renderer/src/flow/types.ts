@@ -29,6 +29,8 @@ interface StepDefBase {
   next?: string
   /** Hide this step from the visible progress count (branch/retry loops). */
   hideFromProgress?: boolean
+  /** Renders full-bleed with no progress header, like welcome/outro - for standalone mini-flows (e.g. Quick Mode) that shouldn't show step tracking at all. */
+  bareChrome?: boolean
 }
 
 export interface WelcomeStep extends StepDefBase {
@@ -76,6 +78,8 @@ export interface AutoStep extends StepDefBase {
   /** Rendered as a numbered checklist, each ticking off in sequence as it completes. */
   subSteps: AutoSubStep[]
   successCopy?: string
+  /** Set false to hide the "Advanced: change build" link - Quick Mode always uses whatever build is already selected, no picker exposed. Defaults to shown. */
+  allowBuildChange?: boolean
 }
 
 export type DriveOption = DiskDevice

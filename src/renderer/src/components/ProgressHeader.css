@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: var(--space-5) var(--space-7) var(--space-3);
+  padding: var(--space-4) var(--space-7);
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
   backdrop-filter: blur(var(--glass-blur)) saturate(160%);
@@ -16,13 +16,18 @@
 }
 
 .progress-header__logo {
-  height: 24px;
+  height: 30px;
   width: auto;
   opacity: 0.92;
+  flex-shrink: 0;
+  /* Matches the header's own left edge padding (--space-7), so the logo
+     sits the same distance from the progress bar as it does from the
+     window edge - the flex row's default gap alone was much smaller. */
+  margin-right: var(--space-7);
 }
 
 .progress-header__count {
-  margin-left: auto;
+  flex-shrink: 0;
   font-size: 12.5px;
   font-weight: 600;
   color: var(--color-text-tertiary);
@@ -30,7 +35,7 @@
 }
 
 .progress-header__track {
-  margin-top: var(--space-3);
+  flex: 1;
   height: 3px;
   border-radius: var(--radius-pill);
   background: var(--color-border);

@@ -157,7 +157,7 @@ export function AutoActionStep({
         </div>
       )}
 
-      {phase === 'idle' && step.action === 'install-magic-lantern' && (
+      {phase === 'idle' && step.action === 'install-magic-lantern' && step.allowBuildChange !== false && (
         <button type="button" className="auto-step__advanced-link" onClick={() => onGoto('choose-build')}>
           Advanced: change build
         </button>
