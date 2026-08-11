@@ -119,7 +119,7 @@
 .welcome-step__update-banner {
   width: 100%;
   margin: var(--space-5) 0 var(--space-6);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-md);
   background: var(--color-accent);
   text-align: left;
@@ -144,12 +144,13 @@
   appearance: none;
   cursor: pointer;
   width: 100%;
-  padding: var(--space-2) var(--space-4);
+  margin-top: 2px;
+  padding: 15px 30px;
   border: none;
   border-radius: var(--radius-pill);
   background: var(--color-accent-contrast);
   color: var(--color-accent);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   transition: opacity 0.15s ease;
 }
