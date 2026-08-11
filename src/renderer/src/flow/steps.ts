@@ -1,6 +1,8 @@
 import { BUILD_OPTIONS } from '@shared/builds'
 import firmwareUpdateVideo from '@renderer/assets/videos/firmware-update.mp4'
 import shutterReleaseVideo from '@renderer/assets/videos/shutter-release-without-lens.mp4'
+import magicLanternFlashVideo from '@renderer/assets/videos/magic-lantern-flash.mp4'
+import magicLanternInfoVideo from '@renderer/assets/videos/magic-lantern-info.mp4'
 import type { FlowStateValues, QuestionStep, StepDef } from './types'
 
 /**
@@ -188,6 +190,7 @@ export const steps: StepDef[] = [
     type: 'info',
     eyebrow: 'On your camera',
     title: 'Prep the camera',
+    media: { kind: 'video', src: magicLanternFlashVideo },
     body: [
       'Insert the SD card we just installed Magic Lantern on.',
       'Turn on the camera, and rotate the mode dial (around the shutter button) to Photo mode.',
@@ -202,6 +205,7 @@ export const steps: StepDef[] = [
     type: 'info',
     eyebrow: 'First boot',
     title: 'Boot into Magic Lantern',
+    media: { kind: 'video', src: magicLanternInfoVideo },
     body: [
       'Rotate the mode dial (around the shutter button) to Video mode.',
       'Hold the Down (Trashcan) button to access Magic Lantern menus.',
