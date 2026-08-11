@@ -153,9 +153,9 @@ export function OutroStep({
 
       <div className="outro-step__footer">
         <Button variant="secondary" onClick={reset}>
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
-            <path d="M2.5 7.5a5 5 0 1 1 1.9 3.9" />
-            <path d="M2.5 11.2V7.5H6.2" />
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
           </svg>
           Start over
         </Button>

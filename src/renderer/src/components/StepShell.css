@@ -15,6 +15,37 @@
   padding: var(--space-7) var(--space-7) var(--space-5);
 }
 
+/* Wider when a step has media next to its steps, so the two columns
+   below have room to breathe instead of getting cramped. */
+.step-shell__inner:has(.step-shell__media-row) {
+  max-width: 920px;
+}
+
+.step-shell__media-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+.step-shell__media-col {
+  flex: 0 0 50%;
+  min-width: 0;
+}
+
+.step-shell__media-col .media-slot {
+  margin: 0;
+}
+
+.step-shell__content-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-shell__content-col .info-step__body {
+  margin-top: 0;
+}
+
 .step-shell--center .step-shell__inner {
   text-align: center;
 }
