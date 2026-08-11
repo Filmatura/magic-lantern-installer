@@ -65,6 +65,10 @@
   margin-bottom: var(--space-6);
 }
 
+.welcome-step__version-check {
+  color: rgba(22, 130, 80, 0.65);
+}
+
 .welcome-step__title {
   font-size: 40px;
   font-weight: 800;

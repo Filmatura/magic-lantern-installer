@@ -38,6 +38,12 @@ export function DrivePickerStep({
 
   useEffect(() => {
     refresh(advanced)
+    // Auto-refresh so a card inserted/removed after landing on this screen
+    // just appears without a manual button - `refresh` only ever replaces
+    // `drives`, never touches `selected`, so a card the user has already
+    // clicked stays selected straight through each background refresh.
+    const interval = setInterval(() => refresh(advanced), 5000)
+    return () => clearInterval(interval)
   }, [refresh, advanced])
 
   const allDrives = [...(drives ?? []), ...(fakeDriveAdded ? [makeFakeDrive()] : [])]
@@ -69,7 +75,7 @@ export function DrivePickerStep({
       {error && <p className="drive-picker__status drive-picker__status--error">Couldn't list drives: {error}</p>}
 
       {!error && !loading && allDrives.length === 0 && (
-        <p className="drive-picker__status">No removable drives found. Insert your SD card, then refresh.</p>
+        <p className="drive-picker__status">No removable drives found. Insert your SD card - we'll pick it up automatically.</p>
       )}
 
       {allDrives.length > 0 && (
@@ -124,17 +130,13 @@ export function DrivePickerStep({
       )}
 
       <div className="drive-picker__footer-row">
-        <button type="button" className="drive-picker__refresh" onClick={() => refresh(advanced)} disabled={loading}>
-          {loading ? 'Refreshing...' : 'Refresh drives'}
-        </button>
         <p className="drive-picker__footnote">
           Only removable drives up to {step.maxSizeGb} GB are shown, so your Mac or PC's own storage is never touched.
         </p>
+        <button type="button" className="drive-picker__refresh" onClick={() => setAdvanced((v) => !v)}>
+          {advanced ? 'Back to normal view' : "Card not showing up?"}
+        </button>
       </div>
-
-      <button type="button" className="drive-picker__advanced-link" onClick={() => setAdvanced((v) => !v)}>
-        {advanced ? 'Advanced: back to normal view' : "Advanced: card not showing up? Override"}
-      </button>
 
       {import.meta.env.DEV && !fakeDriveAdded && (
         <button type="button" className="drive-picker__dev-btn" onClick={() => setFakeDriveAdded(true)}>
