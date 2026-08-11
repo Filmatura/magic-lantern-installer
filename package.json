@@ -50,14 +50,13 @@
     "mac": {
       "icon": "build/icon.icns",
       "target": [
-        "dmg",
         "zip"
       ],
       "category": "public.app-category.photography"
     },
     "win": {
       "target": [
-        "nsis"
+        "portable"
       ]
     },
     "publish": [
