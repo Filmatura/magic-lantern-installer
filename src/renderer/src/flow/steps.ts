@@ -136,7 +136,7 @@ export const steps: StepDef[] = [
     body: [
       'Put the card we just flashed into your EOS M.',
       'Turn on the camera.',
-      'Press MENU to go to Settings, rightmost wrench icon with 4 dots, scroll down to "Firmware Ver.:", select EOSM1202.FIR and press OK, then select it again and press OK again.',
+      'Press MENU to go to Settings, rightmost wrench icon with 4 dots, scroll down to "Firmware Ver.:", select EOSM1202.FIR and press OK, then select OK and press it.',
       'Wait for the confirmation screen, then press OK and restart the camera.'
     ],
     cta: "I've updated the firmware",
