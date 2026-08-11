@@ -47,6 +47,7 @@
         "to": "."
       }
     ],
+    "afterSign": "build/afterSign.cjs",
     "mac": {
       "icon": "build/icon.icns",
       "target": [
