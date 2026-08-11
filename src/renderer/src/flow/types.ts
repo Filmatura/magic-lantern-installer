@@ -106,10 +106,14 @@ export interface BuildPickerStep extends StepDefBase {
 
 export interface OutroStep extends StepDefBase {
   type: 'outro'
-  thanksTo: string
+  /** Full thank-you paragraph. Each `credits[].name` that appears in this text gets turned into a link automatically. */
   thanksCopy: string
+  credits: { name: string; url: string }[]
+  socialLinks: { platform: SocialPlatform; url: string }[]
   links: { label: string; url: string; description?: string }[]
 }
+
+export type SocialPlatform = 'website' | 'youtube' | 'instagram' | 'discord' | 'github'
 
 export interface TroubleshootIssue {
   title: string
@@ -119,6 +123,8 @@ export interface TroubleshootIssue {
 export interface TroubleshootStep extends StepDefBase {
   type: 'troubleshoot'
   issues: TroubleshootIssue[]
+  /** Community links shown as buttons, e.g. Discord/Facebook group, for people who need more help than the FAQ. */
+  communityLinks: { label: string; url: string }[]
 }
 
 export type StepDef =

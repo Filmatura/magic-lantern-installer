@@ -191,7 +191,8 @@ export const steps: StepDef[] = [
     body: [
       'Insert the SD card we just installed Magic Lantern on.',
       'Turn on the camera, and rotate the mode dial (around the shutter button) to Photo mode.',
-      'Go to Settings, second page from the right, scroll down to "Firmware ver.: 2.0.2", press OK, then press OK again. Magic Lantern will now install.'
+      'Go to Settings, second page from the right, scroll down to "Firmware ver.: 2.0.2", press OK, then press OK again. Magic Lantern will now install.',
+      'When prompted, restart your camera. You will now boot into Magic Lantern.'
     ],
     cta: 'Continue',
     next: 'first-boot'
@@ -202,9 +203,10 @@ export const steps: StepDef[] = [
     eyebrow: 'First boot',
     title: 'Boot into Magic Lantern',
     body: [
-      'Go back into the Canon menus and restore any preferences or picture styles you had.',
-      'In LiveView, press INFO/DISP repeatedly until the ML footer bar (audio levels) appears.',
-      'Press DELETE to open the ML menu, and read the help text before exploring further.'
+      'Rotate the mode dial (around the shutter button) to Video mode.',
+      'Hold the Down (Trashcan) button to access Magic Lantern menus.',
+      'Press OK to hide the disclaimer.',
+      "You're now ready to go!"
     ],
     cta: "I'm in Magic Lantern",
     secondaryAction: { label: "I'm having trouble", goto: 'troubleshoot' },
@@ -239,15 +241,31 @@ export const steps: StepDef[] = [
           'Make sure the mode dial is on Photo mode, not a video mode. Then in LiveView, press INFO/DISP a few times until a footer bar with audio levels shows up, and press DELETE to open the ML menu.'
       }
     ],
+    communityLinks: [
+      { label: 'Join our Discord', url: 'https://discord.gg/CBtwJfUm3p' },
+      { label: 'Join our Facebook group', url: 'https://www.facebook.com/groups/filmatura' }
+    ],
     next: 'first-boot'
   },
   {
     id: 'outro',
     type: 'outro',
     title: "You're all set.",
-    thanksTo: 'Amit Kattal',
     thanksCopy:
-      'Huge thanks to Amit Kattal for building and maintaining this incredible Magic Lantern fork - none of this is possible without that work.',
+      "Massive thank you to Bilal, Danne and Amit for paving the way for Magic Lantern on the EOS M to become what it is today. And of course the incredible Magic Lantern devs for years and years of hard work! We wouldn't have been here without you, Thank you!",
+    credits: [
+      { name: 'Bilal', url: 'https://www.magiclantern.fm/forum/index.php?topic=26851.0' },
+      { name: 'Danne', url: 'https://www.magiclantern.fm/forum/index.php?topic=27084.25' },
+      { name: 'Amit', url: 'https://github.com/Amit199167' },
+      { name: 'Magic Lantern devs', url: 'https://www.magiclantern.fm/' }
+    ],
+    socialLinks: [
+      { platform: 'website', url: 'https://filmatura.com' },
+      { platform: 'youtube', url: 'https://www.youtube.com/@Filmatura' },
+      { platform: 'instagram', url: 'https://www.instagram.com/filmatura_cinema/' },
+      { platform: 'discord', url: 'https://discord.gg/CBtwJfUm3p' },
+      { platform: 'github', url: 'https://github.com/Filmatura' }
+    ],
     links: [
       {
         label: 'Explore M-Lite REVO',
