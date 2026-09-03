@@ -130,37 +130,31 @@ export async function runSubStep(
 }
 
 /**
- * Ejects and then waits for the card to be verifiably, physically gone
- * before resolving - not just for the eject command to succeed. Folded in
- * as the last sub-step of both auto-install flows (rather than a separate
- * screen after) so "success" never shows, and Continue never appears,
- * until the card has actually been pulled - no chance of someone yanking
- * the card the moment they see it "done" only to hit a still-mounted
- * warning a screen later.
+ * Ejects (unmounts) the card and reports success as soon as that command
+ * completes - it does NOT wait for the card to be physically pulled out.
+ *
+ * That wait used to be here on purpose (so "success" and Continue never
+ * showed until the card was verifiably gone), but real-world testing found
+ * it actively harmful: the running spinner looked identical to every other
+ * in-progress step, so it wasn't obvious the app was waiting on a physical
+ * action rather than still working - and worse, some USB card readers
+ * never signal removal at the OS level when just the card (not the whole
+ * reader) is pulled out, so the poll could hang forever with no way out
+ * short of unplugging the reader. `diskutil eject` succeeding already
+ * means the volume is safely unmounted; there's nothing left to verify.
  */
 async function ejectDrive(drive: DriveOption, ctx: ActionContext, fake: boolean): Promise<void> {
   if (fake) {
     ctx.log('Ejecting card... (simulated)')
     await wait(600)
-    ctx.log('Card safely ejected.', 'success')
+    ctx.log('Card safely ejected - you can remove it now.', 'success')
     return
   }
 
   ctx.log('Ejecting card...')
   const result = await window.api.disk.eject(drive.id)
   if (!result.ok) throw new Error(result.error ?? 'Eject failed.')
-
-  ctx.log('Please remove the card now - waiting for it to be physically removed...')
-  for (;;) {
-    await wait(1000)
-    // Must match the scope the drive was originally found under - an
-    // override-selected drive (e.g. a built-in reader's internal media)
-    // wouldn't appear in a default-scope list at all, which would make
-    // this look "already removed" on the very first poll.
-    const drives = await window.api.disk.list(drive.override)
-    if (!drives.some((d) => d.id === drive.id)) break
-  }
-  ctx.log('Card safely ejected.', 'success')
+  ctx.log('Card safely ejected - you can remove it now.', 'success')
 }
 
 async function formatDrive(drive: DriveOption, ctx: ActionContext, fake: boolean): Promise<Partial<FlowStateValues>> {

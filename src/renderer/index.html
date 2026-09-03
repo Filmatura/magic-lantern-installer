@@ -5,13 +5,21 @@
     <!--
       Tidio (troubleshooting-page chat widget) needs a real CSP relaxation,
       not just its script host: it renders in an iframe, opens a websocket,
-      and pulls its own styles/fonts/images. Scoped to *.tidio.co - if the
-      widget doesn't render, check the forwarded [renderer] console log in
-      the main process output for the exact host CSP is blocking.
+      and pulls its own styles/fonts/images. Most of that is covered by the
+      *.tidio.co wildcard below, but per Tidio's own documented CSP
+      requirements (developers.tidio.com/docs/widget-security-policy) a few
+      widget assets - notably the emoji picker's icon sprites - are served
+      from hosts that AREN'T under tidio.co at all (cdnjs.cloudflare.com,
+      unpkg.com), plus a couple of tidiochat.com/tidio.com hosts. Missing
+      these is exactly what caused the emoji picker to render but show no
+      actual emoji (the picker UI itself is same-origin-ish, only the glyph
+      images were being silently blocked). If something else in the widget
+      doesn't render, check the forwarded [renderer] console log in the
+      main process output for the exact host CSP is blocking.
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' data: https://*.tidio.co; media-src 'self' https://cdn.shopify.com; style-src 'self' 'unsafe-inline' https://*.tidio.co; font-src 'self' data: https://*.tidio.co; script-src 'self' https://*.tidio.co; frame-src https://*.tidio.co; connect-src 'self' https://api.github.com https://github.com https://objects.githubusercontent.com https://raw.githubusercontent.com https://drive.google.com https://docs.google.com https://cdn.shopify.com https://*.tidio.co wss://*.tidio.co;"
+      content="default-src 'self'; img-src 'self' data: https://*.tidio.co https://cdnjs.cloudflare.com https://unpkg.com https://avatars.tidiochat.com https://tidio-images-messenger.s3.us-east-1.amazonaws.com; media-src 'self' https://cdn.shopify.com; style-src 'self' 'unsafe-inline' https://*.tidio.co; font-src 'self' data: https://*.tidio.co; script-src 'self' https://*.tidio.co; frame-src https://*.tidio.co; connect-src 'self' https://api.github.com https://github.com https://objects.githubusercontent.com https://raw.githubusercontent.com https://drive.google.com https://docs.google.com https://cdn.shopify.com https://*.tidio.co wss://*.tidio.co https://uploads.tidio.com;"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Magic Lantern Installer - Filmatura</title>
