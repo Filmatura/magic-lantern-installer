@@ -186,12 +186,19 @@ export async function formatDrive(deviceId: string, label: string, onLog: (line:
     return { ok: false, mountPath: null, error: (err as Error).message }
   }
 
-  // eraseDisk remounts asynchronously - poll briefly for the new mount point.
-  for (let i = 0; i < 10; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 500))
+  // eraseDisk remounts asynchronously - poll for the new mount point. Real-
+  // world testing found the original 5-second window (10x500ms) too short
+  // for some cards/readers under real load, surfacing as "Format completed
+  // but the card never remounted" even though the format itself was fine
+  // and it would have mounted a few seconds later. 30s is a lot more
+  // generous; if it genuinely never mounts in that window something's
+  // actually wrong (a specific problem card/reader combo, matching what
+  // real testing found - the fix there was trying a different card).
+  const diskId = deviceId.replace('/dev/', '')
+  for (let i = 0; i < 30; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     try {
       const listOut = await run('diskutil', ['list', 'external', 'physical'])
-      const diskId = deviceId.replace('/dev/', '')
       const drive = await describeDisk(listOut, diskId)
       if (drive?.mountPath) return { ok: true, mountPath: drive.mountPath }
     } catch {
@@ -199,7 +206,24 @@ export async function formatDrive(deviceId: string, label: string, onLog: (line:
     }
   }
 
-  return { ok: false, mountPath: null, error: 'Format completed but the card never remounted.' }
+  // Last resort before giving up: the erase may have genuinely succeeded
+  // without macOS auto-remounting it (as opposed to still being in
+  // progress, which the polling above already covers) - try mounting it
+  // explicitly once.
+  try {
+    await execFileAsync('diskutil', ['mountDisk', deviceId], { timeout: 15_000 })
+    const listOut = await run('diskutil', ['list', 'external', 'physical'])
+    const drive = await describeDisk(listOut, diskId)
+    if (drive?.mountPath) return { ok: true, mountPath: drive.mountPath }
+  } catch {
+    // fall through to the error below
+  }
+
+  return {
+    ok: false,
+    mountPath: null,
+    error: 'Format completed but the card never remounted. Try removing and reinserting the card, or a different card/reader if this keeps happening.'
+  }
 }
 
 /**
