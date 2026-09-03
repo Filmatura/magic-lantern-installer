@@ -1,6 +1,6 @@
 # Magic Lantern Installer
 
-A guided, no-nonsense installer for [Magic Lantern](https://www.magiclantern.fm/) on the Canon EOS M — by [Filmatura](https://filmatura.com). Walks you through preparing your SD card, flashing Canon firmware if needed, and copying Magic Lantern onto your camera, with plain-English steps and short video demos at each stage.
+An installer for [Magic Lantern](https://www.magiclantern.fm/) on the Canon EOS M, by [Filmatura](https://filmatura.com). Handles the whole thing - SD card, Canon firmware if you need it, copying Magic Lantern over - with actual video demos instead of walls of text.
 
 <p align="center">
   <a href="https://github.com/Filmatura/magic-lantern-installer/releases/latest">
@@ -8,31 +8,31 @@ A guided, no-nonsense installer for [Magic Lantern](https://www.magiclantern.fm/
   </a>
 </p>
 
-**[⬇ Download the latest version](https://github.com/Filmatura/magic-lantern-installer/releases/latest)** — click the link, then grab the file for your computer (macOS or Windows) under "Assets."
+**[⬇ Grab the latest version here](https://github.com/Filmatura/magic-lantern-installer/releases/latest)** - click through, then pick the file for your computer under "Assets."
 
 ## What it does
 
-- Checks your SD card and warns you before touching anything that isn't safe to format.
-- Flashes the exact Canon firmware version (2.0.2) Magic Lantern needs, if your camera isn't already on it.
-- Downloads and installs the latest Magic Lantern build onto your card.
-- Walks you through the on-camera steps with short videos, not just text.
-- A "Quick Mode" for advanced users who just want the newest build flashed with no hand-holding.
+- Won't let you touch a drive it's not safe to format
+- Flashes Canon firmware 2.0.2 if your camera needs it
+- Grabs the latest Magic Lantern build and puts it on your card
+- Shows you what to do on the camera itself, with short videos - not just text
+- Quick Mode if you already know what you're doing and just want it done, no hand-holding
 
-## Can't open it after downloading?
+## Getting a "can't be opened" error?
 
-**macOS:** you'll likely see "*Magic Lantern Installer* can't be opened" (or, depending on your system language, something like *"nelze otevřít"*). This app isn't code-signed with a paid Apple Developer certificate yet, so macOS Gatekeeper blocks it the first time. To open it anyway:
+**Mac:** you'll probably see something like "Magic Lantern Installer can't be opened" (or "nelze otevřít" if your Mac's set to another language). It's not signed with a paid Apple developer certificate yet, so Gatekeeper blocks it the first time. Easy fix:
 
-1. Find the app in Finder (don't double-click it).
-2. **Right-click (or Control-click) it → Open.**
-3. Click **Open** again in the dialog that appears.
+1. Find the app in Finder (don't double-click it)
+2. Right-click (or Control-click) it → **Open**
+3. Click **Open** again in the popup
 
-You only need to do this once per download - after that it opens normally.
+Only need to do this once - opens normally after that.
 
-**Windows:** you may see a blue "Windows protected your PC" SmartScreen screen, for the same reason (no paid code-signing certificate yet). Click **More info**, then **Run anyway**.
+**Windows:** you might get a blue "Windows protected your PC" screen, same reason - no paid cert yet. Hit **More info**, then **Run anyway**.
 
-## Building blocks and credits
+## Builds & credits
 
-This tool installs pre-built Magic Lantern binaries - it doesn't modify Magic Lantern's own source. Four builds are available (pick under "Advanced: change build"):
+This just installs pre-built Magic Lantern binaries - doesn't touch the source itself. Four builds to pick from (under "Advanced: change build"):
 
 | Build | Source | Maintainer |
 |---|---|---|
@@ -41,13 +41,13 @@ This tool installs pre-built Magic Lantern binaries - it doesn't modify Magic La
 | Crop Mood + Danne Tweaks | [Magic Lantern forum thread](https://www.magiclantern.fm/forum/index.php?topic=27084.25) | Danne |
 | Crop Mood | [Magic Lantern forum thread](https://www.magiclantern.fm/forum/index.php?topic=26851.0) | Bilal |
 
-Huge thanks to Bilal, Danne, and Amit for their work adapting Crop Mood for the EOS M, and to the [Magic Lantern](https://www.magiclantern.fm/) project and its contributors for the underlying firmware itself - none of this exists without their years of work.
+Massive thanks to Bilal, Danne, and Amit for building these out for the EOS M, and to the [Magic Lantern](https://www.magiclantern.fm/) team for the firmware itself - none of this happens without their work.
 
 ### License
 
-Magic Lantern (and every build distributed through this installer) is licensed under the **[GNU GPL v2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)**. Each build's own repository/thread (linked above) is the authoritative source for that build's code. This installer app is a separate, independent tool that only downloads and copies those builds onto your SD card - it doesn't link against or redistribute modified Magic Lantern source itself.
+Magic Lantern (and every build listed here) is licensed under **[GNU GPL v2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)**. Each build's own repo/thread above is where the actual source lives. This installer is a separate tool - it just downloads and copies those builds onto your card, it doesn't touch or redistribute modified Magic Lantern source.
 
-Magic Lantern is **unofficial, free/open-source software, not approved or endorsed by Canon**. Installing it may affect your warranty, and it is used entirely at your own risk. This installer and Filmatura are not affiliated with the official Magic Lantern project.
+Magic Lantern is unofficial, free/open-source software - not made or approved by Canon. Installing it may affect your warranty, and it's entirely at your own risk. This installer and Filmatura aren't affiliated with the official Magic Lantern project.
 
 ## For developers
 
