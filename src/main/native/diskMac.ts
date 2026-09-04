@@ -174,7 +174,12 @@ export async function listDrives(includeInternal = false): Promise<DiskDevice[]>
  * necessarily hard camera-compatibility requirements - this plain MBR
  * format is the pragmatic bet pending confirmation on real hardware.
  */
-export async function formatDrive(deviceId: string, label: string, onLog: (line: string) => void): Promise<FormatResult> {
+export async function formatDrive(
+  deviceId: string,
+  label: string,
+  onLog: (line: string) => void,
+  includeInternal = false
+): Promise<FormatResult> {
   if (!/^\/dev\/disk\d+$/.test(deviceId)) {
     return { ok: false, mountPath: null, error: `Refusing to format unexpected device id: ${deviceId}` }
   }
@@ -186,37 +191,50 @@ export async function formatDrive(deviceId: string, label: string, onLog: (line:
     return { ok: false, mountPath: null, error: (err as Error).message }
   }
 
-  // eraseDisk remounts asynchronously - poll for the new mount point. Real-
-  // world testing found the original 5-second window (10x500ms) too short
-  // for some cards/readers under real load, surfacing as "Format completed
-  // but the card never remounted" even though the format itself was fine
-  // and it would have mounted a few seconds later. 30s is a lot more
-  // generous; if it genuinely never mounts in that window something's
-  // actually wrong (a specific problem card/reader combo, matching what
-  // real testing found - the fix there was trying a different card).
   const diskId = deviceId.replace('/dev/', '')
-  for (let i = 0; i < 30; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+  // Must match the scope this drive was actually found under (same
+  // reasoning as listDrives/ejectDrive elsewhere) - a card in a MacBook's
+  // built-in SD slot is often classified "internal" by diskutil, so
+  // polling only `external, physical` here would never see it mount *at
+  // all*, no matter how long the wait, independently reproducing "never
+  // remounted" regardless of the timeout below.
+  const listArgs = includeInternal ? ['list', 'physical'] : ['list', 'external', 'physical']
+
+  const checkMounted = async (): Promise<string | null> => {
     try {
-      const listOut = await run('diskutil', ['list', 'external', 'physical'])
+      const listOut = await run('diskutil', listArgs)
       const drive = await describeDisk(listOut, diskId)
-      if (drive?.mountPath) return { ok: true, mountPath: drive.mountPath }
+      return drive?.mountPath ?? null
     } catch {
-      // keep polling
+      return null
     }
   }
 
-  // Last resort before giving up: the erase may have genuinely succeeded
-  // without macOS auto-remounting it (as opposed to still being in
-  // progress, which the polling above already covers) - try mounting it
-  // explicitly once.
-  try {
-    await execFileAsync('diskutil', ['mountDisk', deviceId], { timeout: 15_000 })
-    const listOut = await run('diskutil', ['list', 'external', 'physical'])
-    const drive = await describeDisk(listOut, diskId)
-    if (drive?.mountPath) return { ok: true, mountPath: drive.mountPath }
-  } catch {
-    // fall through to the error below
+  // eraseDisk remounts asynchronously most of the time, but real-world
+  // testing surfaced two distinct failure modes this loop covers:
+  //  1. Some cards/readers just take longer than the original 5s window -
+  //     fixed by polling for up to 30s instead of giving up early.
+  //  2. A MacBook's built-in SD slot specifically often doesn't auto-
+  //     remount at all without an explicit nudge - its media-change
+  //     signaling to diskarbitrationd is less reliable than USB mass
+  //     storage's (confirmed via real testing: identical card fails
+  //     repeatedly in the built-in slot, works immediately through a USB
+  //     reader). Fixed by proactively retrying `diskutil mountDisk` every
+  //     few seconds throughout the wait, rather than only as a one-shot
+  //     last resort after the full 30s had already elapsed.
+  for (let i = 0; i < 30; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const mountPath = await checkMounted()
+    if (mountPath) return { ok: true, mountPath }
+
+    if (i % 3 === 2) {
+      try {
+        await execFileAsync('diskutil', ['mountDisk', deviceId], { timeout: 10_000 })
+      } catch {
+        // Ignore - the next checkMounted() call above is the real signal,
+        // this is just a nudge in case macOS didn't do it on its own.
+      }
+    }
   }
 
   return {

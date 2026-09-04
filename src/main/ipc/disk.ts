@@ -49,7 +49,7 @@ export function registerDiskIpc(ipcMain: IpcMain): void {
       return { ok: false, mountPath: null, error: `Refusing to format a drive over ${MAX_DRIVE_SIZE_GB_OVERRIDE} GB.` }
     }
 
-    return backend().formatDrive(deviceId, VOLUME_LABEL, send)
+    return backend().formatDrive(deviceId, VOLUME_LABEL, send, override)
   })
 
   ipcMain.handle('disk:eject', async (_event, deviceId: string): Promise<{ ok: boolean; error?: string }> => {

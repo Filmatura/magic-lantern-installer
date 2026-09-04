@@ -81,7 +81,16 @@ export async function listDrives(includeInternal = false): Promise<DiskDevice[]>
   return drives
 }
 
-export async function formatDrive(deviceId: string, label: string, onLog: (line: string) => void): Promise<FormatResult> {
+// `includeInternal` is accepted for signature parity with diskMac.ts's
+// formatDrive (which needs it to poll the right diskutil scope after
+// erasing) - Windows' Format-Volume is synchronous, no post-format
+// remount-polling exists here to need it.
+export async function formatDrive(
+  deviceId: string,
+  label: string,
+  onLog: (line: string) => void,
+  includeInternal = false
+): Promise<FormatResult> {
   if (!/^\d+$/.test(deviceId)) {
     return { ok: false, mountPath: null, error: `Refusing to format unexpected device id: ${deviceId}` }
   }
