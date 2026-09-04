@@ -1,7 +1,12 @@
+import { useState } from 'react'
 import { Button } from '@renderer/components/Button'
+import { MediaSlot } from '@renderer/components/MediaSlot'
+import { Modal } from '@renderer/components/Modal'
 import { StepShell } from '@renderer/components/StepShell'
 import { TidioChat } from '@renderer/components/TidioChat'
-import type { CommunityPlatform, TroubleshootStep as TroubleshootStepDef } from '@renderer/flow/types'
+import { getStep } from '@renderer/flow/steps'
+import { track } from '@renderer/services/analytics'
+import type { CommunityPlatform, InfoStep as InfoStepDef, TroubleshootStep as TroubleshootStepDef } from '@renderer/flow/types'
 import './TroubleshootStep.css'
 
 const COMMUNITY_ICONS: Record<CommunityPlatform, React.ReactNode> = {
@@ -21,13 +26,13 @@ const COMMUNITY_ICONS: Record<CommunityPlatform, React.ReactNode> = {
 
 export function TroubleshootStep({
   step,
-  onNext,
-  onGoto
+  onNext
 }: {
   step: TroubleshootStepDef
   onNext: () => void
-  onGoto: (stepId: string) => void
 }): React.JSX.Element {
+  const [openGuideId, setOpenGuideId] = useState<string | null>(null)
+
   const open = (url: string): void => {
     void window.api?.openExternal(url)
   }
@@ -50,12 +55,19 @@ export function TroubleshootStep({
             <div className="troubleshoot-step__issue-title">{issue.title}</div>
             <p className="troubleshoot-step__issue-desc">{issue.description}</p>
             {issue.guideLink && (
-              // Jumps straight to the relevant step in the main guide
-              // without forcing anyone through the rest of it - the
-              // standard Back button on that step returns here, since
-              // onGoto pushes this screen onto history same as any other
-              // navigation.
-              <button type="button" className="troubleshoot-step__guide-link" onClick={() => onGoto(issue.guideLink!.goto)}>
+              // Opens the guide content in a popup instead of navigating
+              // there for real - navigating actually pushed that step onto
+              // the flow, so its own "Continue" button carried on into the
+              // rest of the install (re-triggering the format step) instead
+              // of returning to the FAQ. A popup has no such button.
+              <button
+                type="button"
+                className="troubleshoot-step__guide-link"
+                onClick={() => {
+                  track('guide_popup_opened', { issue: issue.title })
+                  setOpenGuideId(issue.guideLink!.goto)
+                }}
+              >
                 {issue.guideLink.label} →
               </button>
             )}
@@ -65,7 +77,15 @@ export function TroubleshootStep({
       {step.communityLinks.length > 0 && (
         <div className="troubleshoot-step__community">
           {step.communityLinks.map((link) => (
-            <button key={link.url} type="button" className="troubleshoot-step__community-btn" onClick={() => open(link.url)}>
+            <button
+              key={link.url}
+              type="button"
+              className="troubleshoot-step__community-btn"
+              onClick={() => {
+                track('community_clicked', { platform: link.platform })
+                open(link.url)
+              }}
+            >
               {COMMUNITY_ICONS[link.platform]}
               {link.label}
             </button>
@@ -73,6 +93,22 @@ export function TroubleshootStep({
         </div>
       )}
       <TidioChat />
+      {openGuideId &&
+        (() => {
+          const guideStep = getStep(openGuideId) as InfoStepDef
+          return (
+            <Modal title={guideStep.title} onClose={() => setOpenGuideId(null)}>
+              <MediaSlot media={guideStep.media} />
+              {guideStep.body && (
+                <ol className="troubleshoot-step__guide-body">
+                  {guideStep.body.map((line, i) => (
+                    <li key={i}>{line}</li>
+                  ))}
+                </ol>
+              )}
+            </Modal>
+          )
+        })()}
     </StepShell>
   )
 }

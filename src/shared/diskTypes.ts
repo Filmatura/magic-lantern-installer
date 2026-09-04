@@ -30,6 +30,12 @@ export interface FormatResult {
   error?: string
 }
 
+/** Result of peeking at a card's root folder before formatting, to warn if it doesn't look like a Canon-formatted SD card (no DCIM/MISC). */
+export interface CardContentCheck {
+  empty: boolean
+  looksLikeCanon: boolean
+}
+
 /**
  * Hard safety ceiling shared by the renderer (for display/disabling) and
  * the main process (as the actual enforcement point right before any

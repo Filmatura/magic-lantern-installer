@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { track } from '@renderer/services/analytics'
 
 const TIDIO_SCRIPT_ID = 'tidio-chat-script'
 const TIDIO_SRC = 'https://code.tidio.co/l9iuimoiyier6lulmpnpp81jdaakpqyn.js'
@@ -30,6 +31,11 @@ export function TidioChat(): null {
     const showWidget = (): void => {
       if (!cancelled) window.tidioChatApi?.show()
     }
+    // Tidio's own lifecycle event, fired each time the visitor opens the
+    // chat window - this is the "did they actually use it" signal, not
+    // just "was the bubble visible."
+    const trackOpen = (): void => track('tidio_chat_opened')
+    document.addEventListener('tidioChat-open', trackOpen)
 
     if (!document.getElementById(TIDIO_STYLE_ID)) {
       // Best-effort nudge so the bubble clears our own footer buttons.
@@ -60,6 +66,7 @@ export function TidioChat(): null {
     return () => {
       cancelled = true
       document.removeEventListener('tidioChat-ready', showWidget)
+      document.removeEventListener('tidioChat-open', trackOpen)
       window.tidioChatApi?.hide()
     }
   }, [])

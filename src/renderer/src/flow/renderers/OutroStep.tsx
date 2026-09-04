@@ -4,6 +4,7 @@ import eosMImage from '@renderer/assets/collections/eos-m.jpg'
 import mLiteImage from '@renderer/assets/collections/m-lite.jpg'
 import { Button } from '@renderer/components/Button'
 import { useAppState } from '@renderer/state/AppState'
+import { track } from '@renderer/services/analytics'
 import type { OutroStep as OutroStepDef, SocialPlatform } from '@renderer/flow/types'
 import './OutroStep.css'
 
@@ -100,7 +101,15 @@ export function OutroStep({
 
           <div className="outro-step__links">
             {step.links.map((link) => (
-              <button key={link.url} type="button" className="outro-step__link" onClick={() => open(link.url)}>
+              <button
+                key={link.url}
+                type="button"
+                className="outro-step__link"
+                onClick={() => {
+                  track('ad_clicked', { label: link.label, url: link.url })
+                  open(link.url)
+                }}
+              >
                 {IMAGE_MAP[link.url] && (
                   <span className="outro-step__link-image">
                     <img src={IMAGE_MAP[link.url]} alt="" />

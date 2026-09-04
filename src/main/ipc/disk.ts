@@ -1,8 +1,13 @@
+import { readdir } from 'node:fs/promises'
 import type { IpcMain, WebContents } from 'electron'
-import type { DiskDevice, FormatResult } from '@shared/diskTypes'
+import type { CardContentCheck, DiskDevice, FormatResult } from '@shared/diskTypes'
 import { MAX_DRIVE_SIZE_GB, MAX_DRIVE_SIZE_GB_OVERRIDE, VOLUME_LABEL } from '@shared/diskTypes'
 import * as diskMac from '../native/diskMac'
 import * as diskWin from '../native/diskWin'
+
+// Junk entries various OSes leave on a card that shouldn't count as "real"
+// content when deciding whether it looks empty or non-Canon.
+const IGNORED_ENTRIES = new Set(['.trashes', '.fseventsd', '.spotlight-v100', '.ds_store', 'system volume information'])
 
 function backend(): typeof diskMac {
   if (process.platform === 'darwin') return diskMac
@@ -54,5 +59,22 @@ export function registerDiskIpc(ipcMain: IpcMain): void {
 
   ipcMain.handle('disk:eject', async (_event, deviceId: string): Promise<{ ok: boolean; error?: string }> => {
     return backend().ejectDrive(deviceId)
+  })
+
+  // Read-only, so this always widens the scan to include internal-media
+  // drives rather than threading the picker's override flag through - there's
+  // nothing here that can act on the card, only look at what's already on it.
+  ipcMain.handle('disk:peekContents', async (_event, deviceId: string): Promise<CardContentCheck | null> => {
+    const drives = await backend().listDrives(true)
+    const target = drives.find((d) => d.id === deviceId)
+    if (!target?.mountPath) return null
+    try {
+      const entries = (await readdir(target.mountPath)).filter((e) => !IGNORED_ENTRIES.has(e.toLowerCase()))
+      if (entries.length === 0) return { empty: true, looksLikeCanon: true }
+      const upper = entries.map((e) => e.toUpperCase())
+      return { empty: false, looksLikeCanon: upper.includes('DCIM') && upper.includes('MISC') }
+    } catch {
+      return null
+    }
   })
 }

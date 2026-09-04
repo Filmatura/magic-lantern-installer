@@ -139,24 +139,26 @@ export function WelcomeStep({
           {/* Deliberately more prominent than a small text link below the
               CTA - a real update being ready is worth noticing before
               starting a 10-minute guided install, not something to bury. */}
+          {/* Both states route to the same manual-download action - on macOS,
+              the in-app restart-and-install step (Squirrel.Mac) only works
+              for a properly Developer-ID-signed app, which this isn't, so
+              offering "Restart to update" here would just fail every time.
+              Confirmed on real hardware, not theoretical: it fails the same
+              way even between two consistently ad-hoc-signed builds. */}
           {(update?.state === 'downloaded' || update?.state === 'blocked') && (
             <div className="welcome-step__update-banner">
               <span className="welcome-step__update-banner-tag">Update recommended</span>
               <p className="welcome-step__update-banner-text">
-                {update.state === 'downloaded'
-                  ? `Version ${update.version} is downloaded and ready to install.`
-                  : `Version ${update.version} is available, but couldn't finish installing automatically.`}
+                {`Version ${update.version} is available.`}
               </p>
               <button
                 type="button"
                 className="welcome-step__update-banner-btn"
                 onClick={() =>
-                  update.state === 'downloaded'
-                    ? window.api?.update.quitAndInstall()
-                    : window.api?.openExternal('https://github.com/Filmatura/magic-lantern-installer/releases/latest')
+                  window.api?.openExternal('https://github.com/Filmatura/magic-lantern-installer/releases/latest')
                 }
               >
-                {update.state === 'downloaded' ? 'Restart to update' : 'Download manually'} →
+                Download manually →
               </button>
             </div>
           )}

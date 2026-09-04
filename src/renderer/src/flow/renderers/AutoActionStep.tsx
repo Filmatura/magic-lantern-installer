@@ -5,7 +5,9 @@ import { LogPanel } from '@renderer/components/LogPanel'
 import { StepShell } from '@renderer/components/StepShell'
 import { useAppState } from '@renderer/state/AppState'
 import { previewLatestBuild, runSubStep, type RunCarry } from '@renderer/services/install'
+import { track } from '@renderer/services/analytics'
 import { getBuildOption } from '@shared/builds'
+import type { CardContentCheck } from '@shared/diskTypes'
 import type { AutoStep as AutoStepDef, FlowStateValues } from '@renderer/flow/types'
 import type { LatestBuildInfo } from '@renderer/services/github'
 import './AutoActionStep.css'
@@ -34,6 +36,27 @@ export function AutoActionStep({
   const [collected, setCollected] = useState<Partial<FlowStateValues>>({})
 
   const drive = values.selectedDrive
+
+  // Only relevant on the format step specifically (checking after
+  // install-magic-lantern would always see an already-freshly-formatted,
+  // empty card) - warns if the selected card has real content on it that
+  // doesn't match a Canon-formatted card's usual DCIM/MISC folders, in
+  // case the wrong card got selected. A genuinely empty card is never flagged.
+  const isFormatStep = step.action === 'format-and-flash-firmware'
+  const [contentCheck, setContentCheck] = useState<CardContentCheck | null>(null)
+  useEffect(() => {
+    if (!isFormatStep || !drive) {
+      setContentCheck(null)
+      return
+    }
+    let cancelled = false
+    window.api?.disk.peekContents(drive.id).then((result) => {
+      if (!cancelled) setContentCheck(result)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [isFormatStep, drive?.id])
 
   useEffect(() => {
     if (!needsRemotePreview) {
@@ -85,6 +108,7 @@ export function AutoActionStep({
         setSubStatus((prev) => ({ ...prev, [sub.id]: 'done' }))
       }
       setCollected(result)
+      track('install_step_succeeded', { action: step.action })
       setPhase('success')
     } catch (err) {
       // Whichever sub-step was running when this threw stays stuck on its
@@ -95,6 +119,7 @@ export function AutoActionStep({
         setSubStatus((prev) => ({ ...prev, [failedId]: 'error' }))
       }
       pushLog(`Failed: ${(err as Error).message}`, 'error')
+      track('install_step_failed', { action: step.action, subStep: currentSubId, message: (err as Error).message })
       setPhase('error')
     } finally {
       unsubscribe?.()
@@ -165,6 +190,13 @@ export function AutoActionStep({
 
       {step.destructive && phase === 'idle' && (
         <div className="auto-step__warning">⚠ {step.confirmCopy ?? 'This will erase the card. Hold to confirm.'}</div>
+      )}
+
+      {isFormatStep && phase === 'idle' && contentCheck && !contentCheck.empty && !contentCheck.looksLikeCanon && (
+        <div className="auto-step__warning">
+          ⚠ This card doesn't look like a Canon SD card - we didn't find the usual DCIM/MISC folders on it. If this isn't
+          the card you meant to use, go back and pick a different one.
+        </div>
       )}
 
       {phase !== 'idle' && (

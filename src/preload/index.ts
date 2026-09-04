@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module'
-import type { DiskDevice, FormatResult } from '@shared/diskTypes'
+import type { CardContentCheck, DiskDevice, FormatResult } from '@shared/diskTypes'
 import type { UpdateStatus } from '@shared/updateTypes'
 
 const require = createRequire(import.meta.url)
@@ -32,7 +32,9 @@ const api = {
     list: (includeInternal?: boolean): Promise<DiskDevice[]> => ipcRenderer.invoke('disk:list', includeInternal),
     /** `override` relaxes the removable/size safety checks for a drive selected via the advanced override - the boot-disk exclusion itself can't be bypassed by this. */
     format: (deviceId: string, override?: boolean): Promise<FormatResult> => ipcRenderer.invoke('disk:format', deviceId, override),
-    eject: (deviceId: string): Promise<CopyResult> => ipcRenderer.invoke('disk:eject', deviceId)
+    eject: (deviceId: string): Promise<CopyResult> => ipcRenderer.invoke('disk:eject', deviceId),
+    /** Peeks at the card's root folder before formatting, to warn if it doesn't look like a Canon-formatted card. */
+    peekContents: (deviceId: string): Promise<CardContentCheck | null> => ipcRenderer.invoke('disk:peekContents', deviceId)
   },
 
   ml: {

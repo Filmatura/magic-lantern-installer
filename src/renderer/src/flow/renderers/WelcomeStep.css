@@ -118,7 +118,10 @@
 
 .welcome-step__update-banner {
   width: 100%;
-  margin: var(--space-5) 0 var(--space-6);
+  /* No top margin - the subtitle above already carries a bottom margin
+     sized for spacing straight into the CTA button, and flex children
+     don't collapse margins, so stacking another one here doubled the gap. */
+  margin: 0 0 var(--space-6);
   padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-md);
   background: var(--color-accent);

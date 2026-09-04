@@ -1,8 +1,9 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { computeVisiblePath, getStep } from '@renderer/flow/steps'
 import { useAppState } from '@renderer/state/AppState'
 import type { FlowStateValues } from '@renderer/flow/types'
 import { ProgressHeader } from '@renderer/components/ProgressHeader'
+import { track } from '@renderer/services/analytics'
 import { WelcomeStep } from './renderers/WelcomeStep'
 import { ChecklistStep } from './renderers/ChecklistStep'
 import { InfoStep } from './renderers/InfoStep'
@@ -17,6 +18,10 @@ import './StepEngine.css'
 export function StepEngine(): React.JSX.Element {
   const { currentStepId, goto, direction, values } = useAppState()
   const step = getStep(currentStepId)
+
+  useEffect(() => {
+    track('step_viewed', { stepId: step.id })
+  }, [step.id])
 
   const goNext = (setState?: Partial<FlowStateValues>): void => {
     if ('next' in step && step.next) goto(step.next, setState)
@@ -64,7 +69,7 @@ export function StepEngine(): React.JSX.Element {
           />
         )
       case 'troubleshoot':
-        return <TroubleshootStep step={step} onNext={goNext} onGoto={goto} />
+        return <TroubleshootStep step={step} onNext={goNext} />
       case 'outro':
         return <OutroStep step={step} onGoto={goto} />
     }
