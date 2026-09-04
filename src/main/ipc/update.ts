@@ -9,6 +9,48 @@ import type { UpdateStatus } from '@shared/updateTypes'
 const require = createRequire(import.meta.url)
 const { autoUpdater } = require('electron-updater') as typeof import('electron-updater')
 
+function isNewerVersion(remote: string, local: string): boolean {
+  const r = remote.split('.').map(Number)
+  const l = local.split('.').map(Number)
+  for (let i = 0; i < Math.max(r.length, l.length); i++) {
+    const rv = r[i] ?? 0
+    const lv = l[i] ?? 0
+    if (rv !== lv) return rv > lv
+  }
+  return false
+}
+
+/**
+ * Windows only. electron-updater's silent download-and-relaunch flow is
+ * built around an NSIS-installed app's registry/uninstaller state -
+ * confirmed on real hardware that it does nothing at all for our portable
+ * .exe target (no download, no "update available" UI, nothing), which
+ * matches how electron-updater's Windows support is documented to work.
+ * Rather than keep pretending to check via a mechanism that can't function
+ * for a portable app, this does a plain version comparison against
+ * GitHub's latest release tag and goes straight to the same "download
+ * manually" prompt used elsewhere for a blocked update - there's no
+ * silent install path to offer on Windows portable regardless.
+ */
+async function checkGithubLatestVersionDirect(send: (status: UpdateStatus) => void): Promise<void> {
+  send({ state: 'checking' })
+  try {
+    const res = await fetch('https://api.github.com/repos/Filmatura/magic-lantern-installer/releases/latest', {
+      headers: { Accept: 'application/vnd.github+json' }
+    })
+    if (!res.ok) throw new Error(`GitHub API responded ${res.status}`)
+    const data = (await res.json()) as { tag_name?: string }
+    const latest = (data.tag_name ?? '').replace(/^v/, '')
+    if (latest && isNewerVersion(latest, app.getVersion())) {
+      send({ state: 'blocked', version: latest })
+    } else {
+      send({ state: 'not-available' })
+    }
+  } catch (err) {
+    send({ state: 'error', message: (err as Error).message })
+  }
+}
+
 /**
  * electron-updater reads `app-update.yml` out of the packaged app's resources
  * to know where to check (GitHub Releases on Filmatura/magic-lantern-installer,
@@ -71,6 +113,10 @@ export function registerUpdateIpc(ipcMain: IpcMain, win: BrowserWindow): void {
   })
 
   if (app.isPackaged) {
-    autoUpdater.checkForUpdates().catch((err) => send({ state: 'error', message: (err as Error).message }))
+    if (process.platform === 'win32') {
+      checkGithubLatestVersionDirect(send)
+    } else {
+      autoUpdater.checkForUpdates().catch((err) => send({ state: 'error', message: (err as Error).message }))
+    }
   }
 }

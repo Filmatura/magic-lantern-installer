@@ -236,29 +236,19 @@ export const steps: StepDef[] = [
     subtitle: "Here are the most common issues at this stage. If none of these fix it, chat with a real person using the button in the corner.",
     issues: [
       {
-        title: "Camera won't boot into Magic Lantern",
-        description:
-          'Double check you selected exactly "Firmware ver.: 2.0.2" in the Settings menu and pressed OK twice. If the screen just shows the normal Canon menu, the card may not have Magic Lantern\'s files at its root - try the install again from the beginning.'
+        title: 'Camera does not let me take photos / video at all',
+        description: 'Make sure "release shutter without lens" is enabled.',
+        guideLink: { label: 'Show me how to enable it', goto: 'enable-shutter-release' }
       },
       {
-        title: "Card isn't recognized by the camera at all",
+        title: 'Camera says "Automagically stopped recording" and stops recording after a couple seconds',
         description:
-          'This is almost always the card itself. Use a Lexar Professional SILVER PLUS 256GB or SanDisk Extreme PRO 256GB - other cards have a high chance of not working, even if they work fine in a computer.'
-      },
-      {
-        title: 'Camera shows a firmware update error screen',
-        description:
-          "This won't damage the camera. Remove the battery for about 10 seconds, put it back in, and try the firmware update step again."
-      },
-      {
-        title: "Magic Lantern menu doesn't appear after boot",
-        description:
-          'Make sure the mode dial is on Photo mode, not a video mode. Then in LiveView, press INFO/DISP a few times until a footer bar with audio levels shows up, and press DELETE to open the ML menu.'
+          "This means the card isn't fast enough for your current video settings. If you're using a card other than the two recommended, it might be too slow - try reducing bit depth and/or recording resolution in settings. Not all cards are equal, and there are Amazon sellers selling non-genuine copies of SanDisk cards."
       }
     ],
     communityLinks: [
-      { label: 'Join our Discord', url: 'https://discord.gg/CBtwJfUm3p' },
-      { label: 'Join our Facebook group', url: 'https://www.facebook.com/groups/filmatura' }
+      { label: 'Join our Discord', url: 'https://discord.gg/CBtwJfUm3p', platform: 'discord' },
+      { label: 'Join our Facebook group', url: 'https://www.facebook.com/groups/filmatura', platform: 'facebook' }
     ],
     next: 'first-boot'
   },

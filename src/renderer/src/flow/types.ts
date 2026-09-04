@@ -119,16 +119,20 @@ export interface OutroStep extends StepDefBase {
 
 export type SocialPlatform = 'website' | 'youtube' | 'instagram' | 'discord' | 'github'
 
+export type CommunityPlatform = 'discord' | 'facebook'
+
 export interface TroubleshootIssue {
   title: string
   description: string
+  /** Optional deep link into a specific step of the main guide (e.g. "here's how to enable X") - shown as a small link under the description. Does not advance the flow or force the user through the rest of the guide. */
+  guideLink?: { label: string; goto: string }
 }
 
 export interface TroubleshootStep extends StepDefBase {
   type: 'troubleshoot'
   issues: TroubleshootIssue[]
   /** Community links shown as buttons, e.g. Discord/Facebook group, for people who need more help than the FAQ. */
-  communityLinks: { label: string; url: string }[]
+  communityLinks: { label: string; url: string; platform: CommunityPlatform }[]
 }
 
 export type StepDef =
