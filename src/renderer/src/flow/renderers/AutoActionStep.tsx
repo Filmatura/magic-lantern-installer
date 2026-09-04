@@ -27,8 +27,16 @@ export function AutoActionStep({
   const { log, pushLog, values } = useAppState()
   const [phase, setPhase] = useState<Phase>('idle')
   const [detailsOpen, setDetailsOpen] = useState(false)
+
+  // The "boot-logo" sub-step is only meaningful when a logo was actually
+  // picked and processed on the Custom Boot Logo step - it's declared on
+  // the step def unconditionally so the run loop and log-checklist logic
+  // don't need two code paths, but it's filtered out of what's actually
+  // shown/run here rather than always appearing as a no-op.
+  const activeSubSteps = step.subSteps.filter((s) => s.id !== 'boot-logo' || !!values.bootLogoBmpBase64)
+
   const [subStatus, setSubStatus] = useState<Record<string, SubStatus>>(() =>
-    Object.fromEntries(step.subSteps.map((s) => [s.id, 'pending' as SubStatus]))
+    Object.fromEntries(activeSubSteps.map((s) => [s.id, 'pending' as SubStatus]))
   )
   const selectedBuild = getBuildOption(values.selectedBuildId)
   const needsRemotePreview = step.action === 'install-magic-lantern' && selectedBuild?.source === 'remote'
@@ -86,10 +94,10 @@ export function AutoActionStep({
     const unsubscribe = window.api?.onTaskLog((line) => pushLog(line))
     let result: Partial<FlowStateValues> = {}
     let liveDrive = drive
-    const carry: RunCarry = {}
+    const carry: RunCarry = { bootLogoBmp: values.bootLogoBmpBase64 }
     let currentSubId: string | null = null
     try {
-      for (const sub of step.subSteps) {
+      for (const sub of activeSubSteps) {
         currentSubId = sub.id
         setSubStatus((prev) => ({ ...prev, [sub.id]: 'running' }))
         const partial = await runSubStep(
@@ -179,6 +187,12 @@ export function AutoActionStep({
               <strong>2.0.2 (bundled with this app)</strong>
             </div>
           )}
+          {values.bootLogoBmpBase64 && (
+            <div className="auto-step__preview-row">
+              <span>Boot logo</span>
+              <strong>Custom image selected</strong>
+            </div>
+          )}
         </div>
       )}
 
@@ -201,7 +215,7 @@ export function AutoActionStep({
 
       {phase !== 'idle' && (
         <div className="auto-step__checklist">
-          {step.subSteps.map((sub, i) => {
+          {activeSubSteps.map((sub, i) => {
             const status = subStatus[sub.id]
             return (
               <div key={sub.id} className={`auto-step__subrow auto-step__subrow--${status}`}>
@@ -227,7 +241,9 @@ export function AutoActionStep({
         </div>
       )}
 
-      {phase === 'success' && <p className="auto-step__done-note">All done - you're clear to continue.</p>}
+      {phase === 'success' && (
+        <p className="auto-step__done-note">{step.successCopy ?? 'All done - you can remove the SD card from the computer.'}</p>
+      )}
       {phase === 'error' && <p className="auto-step__error-note">Something went wrong - see details below.</p>}
 
       {phase !== 'idle' && (

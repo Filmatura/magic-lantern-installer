@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module'
 import type { CardContentCheck, DiskDevice, FormatResult } from '@shared/diskTypes'
 import type { UpdateStatus } from '@shared/updateTypes'
+import type { BootLogoPalette, BootLogoResult, WriteResult } from '@shared/bootLogoTypes'
 
 const require = createRequire(import.meta.url)
 const { contextBridge, ipcRenderer } = require('electron') as typeof import('electron')
@@ -48,6 +49,16 @@ const api = {
   firmware: {
     installToDrive: (deviceId: string, override?: boolean): Promise<CopyResult> =>
       ipcRenderer.invoke('firmware:installToDrive', deviceId, override)
+  },
+
+  bootLogo: {
+    /** Opens a native file picker for an image. Returns null if canceled. */
+    pickImage: (): Promise<string | null> => ipcRenderer.invoke('bootLogo:pickImage'),
+    /** Resizes/letterboxes to 720x480, quantizes against the chosen palette, and returns both a preview and the finished BMP - held in memory in the renderer until write() is called. */
+    generate: (imagePath: string, palette: BootLogoPalette): Promise<BootLogoResult | { error: string }> =>
+      ipcRenderer.invoke('bootLogo:generate', imagePath, palette),
+    write: (deviceId: string, bmpBase64: string, override?: boolean): Promise<WriteResult> =>
+      ipcRenderer.invoke('bootLogo:write', deviceId, bmpBase64, override)
   },
 
   /** Streams log lines from any long-running main-process task (format, download, copy). Returns an unsubscribe function. */

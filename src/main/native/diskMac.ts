@@ -247,10 +247,14 @@ export async function formatDrive(
 /**
  * `diskutil eject` can transiently fail immediately after heavy write
  * activity - the filesystem is still settling even though the write itself
- * already completed - even though ejecting a moment later works fine.
- * Retrying here (instead of surfacing the first failure) avoids a
- * false-positive error flashing in the UI for something that was never
- * actually wrong.
+ * already completed - even though ejecting a moment later works fine. Real
+ * testing surfaced this as macOS's own Spotlight/mdworker (CoreServices)
+ * holding the volume open to index the files that were just copied onto
+ * it, reported as "Unmount was dissented by PID ... CoreServices.framework"
+ * - that can outlast a short retry window, so this one is longer (8
+ * attempts, ~2s apart) to give indexing time to finish and let go on its
+ * own instead of surfacing a false-positive error for something that was
+ * never actually wrong.
  */
 export async function ejectDrive(deviceId: string): Promise<{ ok: boolean; error?: string }> {
   if (!/^\/dev\/disk\d+$/.test(deviceId)) {
@@ -258,13 +262,20 @@ export async function ejectDrive(deviceId: string): Promise<{ ok: boolean; error
   }
 
   let lastError = ''
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 8; attempt++) {
     try {
       await execFileAsync('diskutil', ['eject', deviceId], { timeout: 30_000 })
       return { ok: true }
     } catch (err) {
       lastError = (err as Error).message
-      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1500))
+      // The device is simply gone already - most likely the user (or an
+      // earlier attempt in this same loop) already ejected it manually
+      // while this was retrying. The actual goal - the card being safe to
+      // remove - is already true, so this isn't a real failure.
+      if (/Failed to find disk|could not be found/i.test(lastError)) {
+        return { ok: true }
+      }
+      if (attempt < 8) await new Promise((resolve) => setTimeout(resolve, 2000))
     }
   }
   return { ok: false, error: lastError }

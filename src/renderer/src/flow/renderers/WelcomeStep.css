@@ -162,32 +162,34 @@
   opacity: 0.85;
 }
 
-.welcome-step__quick-mode {
-  appearance: none;
-  cursor: pointer;
-  position: absolute;
-  right: var(--space-5);
-  bottom: var(--space-5);
-  z-index: 2;
-  padding: var(--space-2) var(--space-3);
-  border: none;
-  border-radius: var(--radius-pill);
-  /* A dark chip (not just plain text) so this stays legible regardless of
-     how bright the background video is at any given moment. */
-  background: rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  font-size: 11px;
-  font-weight: 500;
-  /* Deliberately quiet - this is an escape hatch for advanced users, not
-     something to invite everyone else to tap by accident. */
-  color: rgba(255, 255, 255, 0.5);
-  transition:
-    color 0.15s ease,
-    background 0.15s ease;
+.welcome-step__secondary-links {
+  margin-top: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.welcome-step__quick-mode:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(0, 0, 0, 0.48);
+.welcome-step__secondary-links button {
+  appearance: none;
+  cursor: pointer;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  /* More visible than a footnote, but still clearly secondary to the
+     Get Started button above it - that stays the one obvious action. */
+  color: rgba(10, 10, 10, 0.62);
+  transition: color 0.15s ease;
+}
+
+.welcome-step__secondary-links button:hover {
+  color: rgba(10, 10, 10, 0.92);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.welcome-step__secondary-dot {
+  color: rgba(10, 10, 10, 0.35);
+  font-size: 12.5px;
 }

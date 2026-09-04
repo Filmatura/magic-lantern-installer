@@ -30,6 +30,8 @@ export async function previewLatestBuild(offlineMode: boolean, repo: string | un
 /** Carries state between sub-steps within a single run (e.g. where the download landed, for the copy step to use). */
 export interface RunCarry {
   extractedDir?: string
+  /** Set up-front from flow state (not produced by any sub-step) - the finished BOOTLOGO.BMP, base64, if the Custom Boot Logo step was used. */
+  bootLogoBmp?: string | null
 }
 
 /**
@@ -123,10 +125,36 @@ export async function runSubStep(
       ctx.log('Copy complete.', 'success')
       return
     }
+    if (subId === 'boot-logo') {
+      return writeBootLogo(drive, ctx, fake, carry)
+    }
     if (subId === 'eject') {
       return ejectDrive(drive, ctx, fake)
     }
   }
+
+  if (action === 'write-boot-logo') {
+    if (subId === 'boot-logo') {
+      return writeBootLogo(drive, ctx, fake, carry)
+    }
+    if (subId === 'eject') {
+      return ejectDrive(drive, ctx, fake)
+    }
+  }
+}
+
+async function writeBootLogo(drive: DriveOption, ctx: ActionContext, fake: boolean, carry: RunCarry): Promise<void> {
+  if (!carry.bootLogoBmp) throw new Error('No boot logo to write.')
+  if (fake) {
+    ctx.log('Writing BOOTLOGO.BMP to card... (simulated)')
+    await wait(300)
+    ctx.log('Boot logo written.', 'success')
+    return
+  }
+  ctx.log('Writing BOOTLOGO.BMP to card...')
+  const result = await window.api.bootLogo.write(drive.id, carry.bootLogoBmp, drive.override)
+  if (!result.ok) throw new Error(result.error ?? 'Failed to write boot logo.')
+  ctx.log('Boot logo written.', 'success')
 }
 
 /**

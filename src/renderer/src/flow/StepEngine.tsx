@@ -13,6 +13,7 @@ import { DrivePickerStep } from './renderers/DrivePickerStep'
 import { BuildPickerStep } from './renderers/BuildPickerStep'
 import { TroubleshootStep } from './renderers/TroubleshootStep'
 import { OutroStep } from './renderers/OutroStep'
+import { CustomBootLogoStep } from './renderers/CustomBootLogoStep'
 import './StepEngine.css'
 
 export function StepEngine(): React.JSX.Element {
@@ -68,6 +69,8 @@ export function StepEngine(): React.JSX.Element {
             onNext={(buildId) => goto(step.next!, { selectedBuildId: buildId })}
           />
         )
+      case 'boot-logo':
+        return <CustomBootLogoStep step={step} onGoto={goto} />
       case 'troubleshoot':
         return <TroubleshootStep step={step} onNext={goNext} />
       case 'outro':

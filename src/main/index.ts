@@ -4,6 +4,7 @@ import { registerDiskIpc } from './ipc/disk'
 import { registerMlIpc } from './ipc/ml'
 import { registerFirmwareIpc } from './ipc/firmware'
 import { registerUpdateIpc } from './ipc/update'
+import { registerBootLogoIpc } from './ipc/bootLogo'
 
 // Electron's built-in "electron" module doesn't reliably expose named ESM
 // exports on every Node/Electron combo (its shape isn't statically
@@ -62,6 +63,7 @@ ipcMain.handle('app:quit', () => app.quit())
 registerDiskIpc(ipcMain)
 registerMlIpc(ipcMain)
 registerFirmwareIpc(ipcMain)
+registerBootLogoIpc(ipcMain)
 
 app.whenReady().then(() => {
   const win = createWindow()

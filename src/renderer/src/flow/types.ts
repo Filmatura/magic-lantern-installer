@@ -1,5 +1,6 @@
 import type { DiskDevice } from '@shared/diskTypes'
 import type { BuildDefinition } from '@shared/builds'
+import type { BootLogoPalette } from '@shared/bootLogoTypes'
 
 export type MediaSpec =
   | { kind: 'image'; src: string; alt: string }
@@ -13,7 +14,7 @@ export interface QuestionOption {
   tone?: 'default' | 'primary'
 }
 
-export type AutoActionKey = 'format-and-flash-firmware' | 'install-magic-lantern'
+export type AutoActionKey = 'format-and-flash-firmware' | 'install-magic-lantern' | 'write-boot-logo'
 
 export interface AutoSubStep {
   id: string
@@ -121,6 +122,15 @@ export type SocialPlatform = 'website' | 'youtube' | 'instagram' | 'discord' | '
 
 export type CommunityPlatform = 'discord' | 'facebook'
 
+export interface CustomBootLogoStep extends StepDefBase {
+  type: 'boot-logo'
+  next: string
+  /** Where the skip button goes, if different from `next` - e.g. the standalone "just add a logo" entry point routes skip back to Welcome instead of into a write step with nothing to write. Defaults to `next`. */
+  skipNext?: string
+  /** Defaults to "Skip this step". */
+  skipLabel?: string
+}
+
 export interface TroubleshootIssue {
   title: string
   description: string
@@ -145,6 +155,7 @@ export type StepDef =
   | BuildPickerStep
   | TroubleshootStep
   | OutroStep
+  | CustomBootLogoStep
 
 export interface FlowStateValues {
   firmwareReady: boolean | null
@@ -156,6 +167,9 @@ export interface FlowStateValues {
   /** Filled in once the install step actually runs - drives the outro summary. */
   mlVersion: string | null
   mlBuildName: string | null
+  /** Set once a boot logo has been picked and processed on the Custom Boot Logo step - held here (not written to disk) until the install/write step's own "boot-logo" sub-step picks it up. Null means the step was skipped. */
+  bootLogoBmpBase64: string | null
+  bootLogoPreviewDataUrl: string | null
 }
 
 export interface LogEntry {

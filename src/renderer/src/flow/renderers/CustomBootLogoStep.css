@@ -1,0 +1,91 @@
+.boot-logo-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.boot-logo-step__preview-frame {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius-md);
+  background: #000;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boot-logo-step__preview-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  /* Deliberately NOT `pixelated` - that forces nearest-neighbor scaling,
+     which aliases a dithered image into ugly noise that doesn't match
+     what the BMP actually looks like opened directly. Default (smooth)
+     scaling looks right at any size. */
+}
+
+.boot-logo-step__preview-status {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+.boot-logo-step__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.boot-logo-step__filename {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.boot-logo-step__error {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  font-size: 13px;
+}
+
+.boot-logo-step__palettes {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.boot-logo-step__palette {
+  appearance: none;
+  cursor: pointer;
+  flex: 1 1 200px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: border-color 0.15s ease;
+}
+
+.boot-logo-step__palette-label {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.boot-logo-step__palette-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.boot-logo-step__palette--selected {
+  border-color: var(--color-accent);
+  background: var(--color-surface-sunken);
+}

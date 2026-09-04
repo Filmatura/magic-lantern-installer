@@ -21,7 +21,9 @@ const initialValues: FlowStateValues = {
   selectedBuildId: 'filmatura',
   offlineMode: false,
   mlVersion: null,
-  mlBuildName: null
+  mlBuildName: null,
+  bootLogoBmpBase64: null,
+  bootLogoPreviewDataUrl: null
 }
 
 const AppStateContext = createContext<AppStateShape | null>(null)

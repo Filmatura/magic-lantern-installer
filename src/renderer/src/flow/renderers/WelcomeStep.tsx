@@ -171,16 +171,25 @@ export function WelcomeStep({
               Downloading update... {update.percent}%
             </span>
           )}
+
+          {/* Secondary paths, deliberately smaller/quieter than the Get
+              Started button above so it stays the obvious main action -
+              but still real text buttons (not corner chips) since both are
+              meant to be findable, not hidden. */}
+          <div className="welcome-step__secondary-links">
+            <button type="button" onClick={() => onGoto('quick-mode-drive-picker')}>
+              Quick Mode (Advanced users)
+            </button>
+            <span className="welcome-step__secondary-dot" aria-hidden>
+              ·
+            </span>
+            <button type="button" onClick={() => onGoto('boot-logo-drive-picker')}>
+              Add a custom boot logo
+            </button>
+          </div>
         </div>
         <p className="welcome-step__footnote">Takes about 10 minutes. We'll guide you through every step.</p>
       </div>
-      <button
-        type="button"
-        className="welcome-step__quick-mode"
-        onClick={() => onGoto('quick-mode-drive-picker')}
-      >
-        Quick Mode (Advanced users)
-      </button>
     </div>
   )
 }

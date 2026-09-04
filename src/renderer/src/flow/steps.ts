@@ -33,7 +33,7 @@ export const steps: StepDef[] = [
     title: "Let's get your gear ready",
     items: [
       'Use a fully charged, original Canon battery - not a third-party one.',
-      'Grab a card reader and a SD card.'
+      'Grab a card reader (or use a built-in SD reader) and a SD card.'
     ],
     recommendations: {
       title: 'You need one of these two cards',
@@ -93,7 +93,7 @@ export const steps: StepDef[] = [
     subtitle:
       'Turn the mode dial to Photo mode, then check under the Canon menu wrench tab. Not sure? Pick "No / not sure" and we\'ll get you there safely.',
     options: [
-      { label: "Yes, I'm on 2.0.2", goto: 'install-magic-lantern', setState: { firmwareReady: true }, tone: 'primary' },
+      { label: "Yes, I'm on 2.0.2", goto: 'custom-boot-logo', setState: { firmwareReady: true }, tone: 'primary' },
       { label: 'No / not sure', goto: 'firmware-path-intro', setState: { firmwareReady: false } }
     ]
   },
@@ -124,7 +124,7 @@ export const steps: StepDef[] = [
       { id: 'flash', label: 'Copy Canon firmware' },
       { id: 'eject', label: 'Eject card' }
     ],
-    successCopy: 'Card formatted, Canon firmware ready, and safely ejected.',
+    successCopy: 'Card formatted and Canon firmware is ready - you can remove the SD card from the computer.',
     next: 'install-canon-firmware-guided'
   },
   {
@@ -174,6 +174,14 @@ export const steps: StepDef[] = [
     maxSizeGb: 256,
     recommendedSizeRangeGb: [230, 260],
     clearPriorSelection: true,
+    next: 'custom-boot-logo'
+  },
+  {
+    id: 'custom-boot-logo',
+    type: 'boot-logo',
+    eyebrow: 'Optional',
+    title: 'Add a custom boot logo?',
+    subtitle: "Show your own image on the camera's boot screen instead of the default. Totally optional - skip it if you don't care.",
     next: 'install-magic-lantern'
   },
   {
@@ -189,9 +197,10 @@ export const steps: StepDef[] = [
       { id: 'download', label: 'Prepare Magic Lantern build' },
       { id: 'format', label: 'Format SD card' },
       { id: 'copy', label: 'Copy files to card' },
+      { id: 'boot-logo', label: 'Write custom boot logo' },
       { id: 'eject', label: 'Eject card' }
     ],
-    successCopy: 'Magic Lantern is installed and safely ejected.',
+    successCopy: 'Magic Lantern is installed and safely ejected - you can remove the SD card from the computer.',
     next: 'camera-prep'
   },
   {
@@ -287,7 +296,51 @@ export const steps: StepDef[] = [
       { id: 'copy', label: 'Copy files to card' },
       { id: 'eject', label: 'Eject card' }
     ],
-    successCopy: 'Magic Lantern is installed and safely ejected.',
+    successCopy: 'Magic Lantern is installed and safely ejected - you can remove the SD card from the computer.',
+    next: 'outro'
+  },
+  {
+    // Reached only via the "Add a custom boot logo" link on the welcome
+    // screen - for someone who already has Magic Lantern installed and
+    // just wants to add or change the boot splash without reinstalling
+    // anything. Same bareChrome/hideFromProgress treatment as Quick Mode.
+    id: 'boot-logo-drive-picker',
+    type: 'drive-picker',
+    bareChrome: true,
+    hideFromProgress: true,
+    eyebrow: 'Custom Boot Logo',
+    title: 'Select your SD card',
+    subtitle: 'Pick the card that already has Magic Lantern installed on it.',
+    maxSizeGb: 256,
+    recommendedSizeRangeGb: [230, 260],
+    next: 'boot-logo-only'
+  },
+  {
+    id: 'boot-logo-only',
+    type: 'boot-logo',
+    bareChrome: true,
+    hideFromProgress: true,
+    eyebrow: 'Custom Boot Logo',
+    title: 'Choose your boot logo',
+    subtitle: "Show your own image on the camera's boot screen instead of the default.",
+    skipLabel: 'Cancel',
+    skipNext: 'welcome',
+    next: 'boot-logo-write'
+  },
+  {
+    id: 'boot-logo-write',
+    type: 'auto',
+    bareChrome: true,
+    hideFromProgress: true,
+    eyebrow: 'Custom Boot Logo - automatic',
+    title: 'Write your boot logo',
+    subtitle: "We'll copy the logo onto your card and eject it safely.",
+    action: 'write-boot-logo',
+    subSteps: [
+      { id: 'boot-logo', label: 'Write custom boot logo' },
+      { id: 'eject', label: 'Eject card' }
+    ],
+    successCopy: 'Boot logo written and safely ejected - you can remove the SD card from the computer.',
     next: 'outro'
   },
   {
@@ -340,7 +393,7 @@ export function getStep(id: string): StepDef {
  */
 function resolveDefaultNext(step: QuestionStep, values: FlowStateValues): string | undefined {
   if (step.id === 'firmware-check') {
-    return values.firmwareReady === false ? 'firmware-path-intro' : 'install-magic-lantern'
+    return values.firmwareReady === false ? 'firmware-path-intro' : 'custom-boot-logo'
   }
   if (step.id === 'firmware-confirm') {
     return 'reselect-drive'
