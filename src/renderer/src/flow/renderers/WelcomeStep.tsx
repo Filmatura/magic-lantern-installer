@@ -145,7 +145,7 @@ export function WelcomeStep({
               <p className="welcome-step__update-banner-text">
                 {update.state === 'downloaded'
                   ? `Version ${update.version} is downloaded and ready to install.`
-                  : `Version ${update.version} is available.`}
+                  : `Version ${update.version} is available, but couldn't finish installing automatically.`}
               </p>
               <button
                 type="button"

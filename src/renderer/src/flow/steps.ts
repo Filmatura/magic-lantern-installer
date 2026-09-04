@@ -323,7 +323,7 @@ export const steps: StepDef[] = [
       {
         label: 'Explore M-Lite REVO',
         url: 'https://filmatura.com/collections/m-lite',
-        description: 'Rigging built for run-and-gun EOS M shooters.'
+        description: 'Turn your camera into a box cine cam using our DIY kit.'
       },
       {
         label: 'Explore EOS M gear',

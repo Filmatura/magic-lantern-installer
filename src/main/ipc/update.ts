@@ -45,6 +45,15 @@ export function registerUpdateIpc(ipcMain: IpcMain, win: BrowserWindow): void {
   autoUpdater.on('download-progress', (progress) => send({ state: 'downloading', percent: Math.round(progress.percent) }))
   autoUpdater.on('update-downloaded', (info) => send({ state: 'downloaded', version: info.version }))
   autoUpdater.on('error', (err) => {
+    // Logged (not just sent to the UI as a generic "blocked" state) because
+    // this is also where a failed quitAndInstall() surfaces - Squirrel.Mac
+    // requires the *running* app to have a real, consistent code signature
+    // to replace itself in place, which an ad-hoc-only signature doesn't
+    // satisfy (nor did any build before the ad-hoc-signing fix landed, so
+    // updating away from one of those old unsigned installs is expected to
+    // hit this). This log line is what tells us which case we're actually
+    // in if it comes up again.
+    console.error('[update] error event:', err.message)
     if (knownUpdateVersion) {
       send({ state: 'blocked', version: knownUpdateVersion })
     } else {
@@ -54,7 +63,9 @@ export function registerUpdateIpc(ipcMain: IpcMain, win: BrowserWindow): void {
 
   // Only the renderer-visible "restart & install" action is user-triggered
   // (see WelcomeStep) - the check-and-download itself runs automatically
-  // on launch, same as most consumer apps.
+  // on launch, same as most consumer apps. quitAndInstall() failing doesn't
+  // throw synchronously here - it fails asynchronously through Squirrel's
+  // own machinery and surfaces via the 'error' listener above instead.
   ipcMain.handle('update:quitAndInstall', () => {
     autoUpdater.quitAndInstall()
   })
