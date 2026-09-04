@@ -1,6 +1,6 @@
 {
   "name": "magic-lantern-installer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Magic Lantern Installer for EOS M - by Filmatura",
   "author": "Filmatura",
   "main": "./out/main/index.js",
