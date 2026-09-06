@@ -75,6 +75,9 @@ export const steps: StepDef[] = [
     // Magic Lantern screen, never through the main flow - hidden from
     // progress and not on any step's default `next` chain, so it can't
     // confuse anyone who doesn't go looking for it.
+    // Returns to whichever install step (Guided or Quick Mode) it was
+    // opened from via back() rather than a fixed `next` - see StepEngine's
+    // build-picker case.
     id: 'choose-build',
     type: 'build-picker',
     hideFromProgress: true,
@@ -82,8 +85,7 @@ export const steps: StepDef[] = [
     title: 'Choose your build',
     subtitle:
       "This is an advanced option most people should skip. Filmatura's Crop Mood is the recommended default - only pick one of the others if you specifically need what it offers.",
-    options: BUILD_OPTIONS,
-    next: 'install-magic-lantern'
+    options: BUILD_OPTIONS
   },
   {
     id: 'firmware-check',
@@ -289,7 +291,6 @@ export const steps: StepDef[] = [
     action: 'install-magic-lantern',
     destructive: true,
     confirmCopy: 'This erases everything currently on the card. Hold for 3 seconds to confirm.',
-    allowBuildChange: false,
     subSteps: [
       { id: 'download', label: 'Prepare Magic Lantern build' },
       { id: 'format', label: 'Format SD card' },

@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import filmaturaBlack from '@renderer/assets/brand/filmatura-black.png'
 import { Button } from '@renderer/components/Button'
 import { APP_VERSION } from '@renderer/version'
+import { track } from '@renderer/services/analytics'
 import type { WelcomeStep as WelcomeStepDef } from '@renderer/flow/types'
 import type { UpdateStatus } from '@shared/updateTypes'
 import './WelcomeStep.css'
+
+const RELEASES_URL = 'https://github.com/Filmatura/magic-lantern-installer/releases/latest'
 
 /**
  * Streamed from Filmatura's Shopify Files (720p renditions) instead of
@@ -49,6 +52,34 @@ export function WelcomeStep({
   useEffect(() => {
     return window.api?.update.onStatus(setUpdate)
   }, [])
+
+  // 'downloading' doesn't carry its own version (see UpdateStatus) - this
+  // remembers whatever version 'available' most recently reported, so the
+  // banner/tracking still has it once we move past that state.
+  const [knownVersion, setKnownVersion] = useState<string | null>(null)
+  useEffect(() => {
+    if (update && 'version' in update) setKnownVersion(update.version)
+  }, [update])
+
+  // As soon as we KNOW a newer version exists - not waiting for a
+  // background download to finish, since Restart-to-update doesn't
+  // reliably work on Mac anyway (see the update-banner note below) - the
+  // main action becomes updating instead of starting a 10-minute guided
+  // install on a build with known-fixed bugs already sitting in a newer
+  // release. Fails open on its own: 'checking'/'not-available'/'error'
+  // (can't reach GitHub, or already current) all leave Get Started as-is.
+  const updateKnownNewer =
+    update?.state === 'available' || update?.state === 'downloading' || update?.state === 'downloaded' || update?.state === 'blocked'
+
+  const updateNow = (): void => {
+    track('update_now_clicked', { version: knownVersion })
+    void window.api?.openExternal(RELEASES_URL)
+  }
+
+  const updateLater = (): void => {
+    track('update_later_clicked', { version: knownVersion })
+    onNext()
+  }
 
   useEffect(() => {
     const [a, b] = slotIndices.current
@@ -136,40 +167,27 @@ export function WelcomeStep({
           <h1 className="welcome-step__title">{step.title}</h1>
           <p className="welcome-step__subtitle">{step.subtitle}</p>
 
-          {/* Deliberately more prominent than a small text link below the
-              CTA - a real update being ready is worth noticing before
-              starting a 10-minute guided install, not something to bury. */}
-          {/* Both states route to the same manual-download action - on macOS,
-              the in-app restart-and-install step (Squirrel.Mac) only works
-              for a properly Developer-ID-signed app, which this isn't, so
-              offering "Restart to update" here would just fail every time.
-              Confirmed on real hardware, not theoretical: it fails the same
-              way even between two consistently ad-hoc-signed builds. */}
-          {(update?.state === 'downloaded' || update?.state === 'blocked') && (
+          {updateKnownNewer ? (
             <div className="welcome-step__update-banner">
-              <span className="welcome-step__update-banner-tag">Update recommended</span>
+              <span className="welcome-step__update-banner-tag">Update available</span>
               <p className="welcome-step__update-banner-text">
-                {`Version ${update.version} is available.`}
+                {knownVersion ? `Version ${knownVersion} is ready - grab it before starting.` : 'A newer version is ready - grab it before starting.'}
               </p>
-              <button
-                type="button"
-                className="welcome-step__update-banner-btn"
-                onClick={() =>
-                  window.api?.openExternal('https://github.com/Filmatura/magic-lantern-installer/releases/latest')
-                }
-              >
-                Download manually →
+              {/* Plain button, not the shared Button component - its
+                  primary variant is the same near-black as this banner's
+                  own background, which would make it invisible here. This
+                  needs the inverted (light-on-dark) treatment instead. */}
+              <button type="button" className="welcome-step__update-banner-btn" onClick={updateNow}>
+                Update now →
+              </button>
+              <button type="button" className="welcome-step__update-later" onClick={updateLater}>
+                Update later
               </button>
             </div>
-          )}
-
-          <Button size="lg" withArrow onClick={onNext} className="welcome-step__cta">
-            Get started
-          </Button>
-          {update?.state === 'downloading' && (
-            <span className="welcome-step__update welcome-step__update--passive">
-              Downloading update... {update.percent}%
-            </span>
+          ) : (
+            <Button size="lg" withArrow onClick={onNext} className="welcome-step__cta">
+              Get started
+            </Button>
           )}
 
           {/* Secondary paths, deliberately smaller/quieter than the Get

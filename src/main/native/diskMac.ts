@@ -225,7 +225,22 @@ export async function formatDrive(
   for (let i = 0; i < 30; i++) {
     await new Promise((resolve) => setTimeout(resolve, 1000))
     const mountPath = await checkMounted()
-    if (mountPath) return { ok: true, mountPath }
+    if (mountPath) {
+      // Real testing showed eject later failing because Spotlight
+      // (mdworker, part of CoreServices) grabs the freshly-formatted
+      // volume to index it, and can hold on well past any reasonable
+      // eject retry window - "Unmount was dissented by ... CoreServices".
+      // Turning indexing off for this one volume up front means it never
+      // starts holding a lock in the first place. Best-effort: mdutil can
+      // fail without Full Disk Access on some macOS versions, and the
+      // eject retry loop is still there as a fallback if this doesn't apply.
+      try {
+        await execFileAsync('mdutil', ['-i', 'off', mountPath], { timeout: 10_000 })
+      } catch {
+        // Ignore - not fatal, just one less layer of protection against the eject issue.
+      }
+      return { ok: true, mountPath }
+    }
 
     if (i % 3 === 2) {
       try {
@@ -245,26 +260,50 @@ export async function formatDrive(
 }
 
 /**
- * `diskutil eject` can transiently fail immediately after heavy write
- * activity - the filesystem is still settling even though the write itself
- * already completed - even though ejecting a moment later works fine. Real
- * testing surfaced this as macOS's own Spotlight/mdworker (CoreServices)
+ * `diskutil eject` (no modifier) can fail immediately after heavy write
+ * activity because macOS's own Spotlight/mdworker (CoreServices) is still
  * holding the volume open to index the files that were just copied onto
- * it, reported as "Unmount was dissented by PID ... CoreServices.framework"
- * - that can outlast a short retry window, so this one is longer (8
- * attempts, ~2s apart) to give indexing time to finish and let go on its
- * own instead of surfacing a false-positive error for something that was
- * never actually wrong.
+ * it - reported as "Unmount was dissented by PID ... CoreServices.framework".
+ * A plain eject respects that dissent and just fails.
+ *
+ * Fixed properly (not just outlasted with retries) by checking how
+ * Raspberry Pi Imager - which ejects freshly-written cards constantly and
+ * reliably - does this on macOS: it doesn't use plain unmount/eject at
+ * all, it calls DiskArbitration's DADiskUnmount with
+ * kDADiskUnmountOptionForce before ejecting (src/mac/platformquirks_macos.mm,
+ * raspberrypi/rpi-imager). `diskutil` exposes that exact same force option
+ * on the CLI ("force will force-unmount the volumes (less kind to any
+ * open files)", per `man diskutil`) - `eject force` overrides the
+ * dissenter instead of waiting it out. Safe here specifically because
+ * `sync` below already guarantees our own writes are physically on the
+ * card first - the only thing force is overriding is Spotlight's
+ * read-only indexing pass, never our own pending data.
+ *
+ * `sync` addresses a second, independent contributor: `fs.cp`/`fs.copyFile`
+ * resolve once the OS accepts the write into its buffer cache, not once
+ * the bytes are actually physically on the card - a slow SD card can lag
+ * behind by real seconds, and the log showing "Copy complete" instantly
+ * doesn't mean the write is actually done at the hardware level. `sync`
+ * blocks until all pending filesystem writes are flushed system-wide, so
+ * running it first ensures eject is never racing a write that only looks
+ * finished.
  */
 export async function ejectDrive(deviceId: string): Promise<{ ok: boolean; error?: string }> {
   if (!/^\/dev\/disk\d+$/.test(deviceId)) {
     return { ok: false, error: `Refusing to eject unexpected device id: ${deviceId}` }
   }
 
+  try {
+    await execFileAsync('sync', [], { timeout: 30_000 })
+  } catch {
+    // Ignore - sync taking no arguments essentially can't fail meaningfully
+    // here; the eject retry loop below is still the real safety net.
+  }
+
   let lastError = ''
   for (let attempt = 1; attempt <= 8; attempt++) {
     try {
-      await execFileAsync('diskutil', ['eject', deviceId], { timeout: 30_000 })
+      await execFileAsync('diskutil', ['eject', 'force', deviceId], { timeout: 30_000 })
       return { ok: true }
     } catch (err) {
       lastError = (err as Error).message

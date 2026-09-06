@@ -17,7 +17,7 @@ import { CustomBootLogoStep } from './renderers/CustomBootLogoStep'
 import './StepEngine.css'
 
 export function StepEngine(): React.JSX.Element {
-  const { currentStepId, goto, direction, values } = useAppState()
+  const { currentStepId, goto, back, direction, values } = useAppState()
   const step = getStep(currentStepId)
 
   useEffect(() => {
@@ -62,13 +62,12 @@ export function StepEngine(): React.JSX.Element {
           />
         )
       case 'build-picker':
-        return (
-          <BuildPickerStep
-            step={step}
-            selectedId={values.selectedBuildId}
-            onNext={(buildId) => goto(step.next!, { selectedBuildId: buildId })}
-          />
-        )
+        // Reached only via the "Advanced: change build" link on whichever
+        // install step is currently showing (Guided or Quick Mode) - it
+        // always returns to that same step with the new build id, rather
+        // than a fixed forward target, so both callers land back where
+        // they actually came from instead of always the Guided flow.
+        return <BuildPickerStep step={step} selectedId={values.selectedBuildId} onNext={(buildId) => back({ selectedBuildId: buildId })} />
       case 'boot-logo':
         return <CustomBootLogoStep step={step} onGoto={goto} />
       case 'troubleshoot':

@@ -9,7 +9,7 @@ interface AppStateShape {
   log: LogEntry[]
   direction: 'forward' | 'back'
   goto: (stepId: string, setState?: Partial<FlowStateValues>) => void
-  back: () => void
+  back: (setState?: Partial<FlowStateValues>) => void
   reset: () => void
   canGoBack: boolean
   pushLog: (text: string, tone?: LogEntry['tone']) => void
@@ -53,8 +53,9 @@ export function AppStateProvider({ children }: { children: ReactNode }): React.J
     [currentStepId]
   )
 
-  const back = useCallback(() => {
+  const back = useCallback((setState?: Partial<FlowStateValues>) => {
     setDirection('back')
+    if (setState) setValues((prev) => ({ ...prev, ...setState }))
     setHistory((prev) => {
       if (prev.length === 0) return prev
       const next = [...prev]
